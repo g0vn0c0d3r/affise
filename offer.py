@@ -24,3 +24,10 @@ class Offer:
 			if self._raw_data['stats'][i]['slice']['affiliate']['id'] not in partners:
 				partners.append(self._raw_data['stats'][i]['slice']['affiliate']['id'])
 		return sorted(partners)
+
+	def get_webmasters_list(self):
+		webmasters = []
+		for i in range(len(self._raw_data['stats'])):
+			if (self._raw_data['stats'][i]['slice']['sub3']).isdigit() is True and int(self._raw_data['stats'][i]['slice']['sub3']) not in webmasters:
+				webmasters.append(int(self._raw_data['stats'][i]['slice']['sub3']))
+		return sorted(webmasters)
