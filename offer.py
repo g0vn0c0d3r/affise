@@ -23,7 +23,7 @@ class Offer:
 			if r['stats'][i]['slice']['affiliate'] is not None:
 				partner_list.append(r['stats'][i]['slice']['affiliate']['id'])
 
-		return partner_list
+		return sorted(partner_list)
 
 	def get_webmaster_list(self, *, start_date: str, end_date: str):
 		r = requests.get(
