@@ -1,4 +1,5 @@
-from affise.offer import Offer
+from offer import Offer
+
 
 lime_cpl = Offer(offer_id=15)
 
