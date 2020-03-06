@@ -14,3 +14,5 @@ params = (
 response = requests.get('https://api-lime-finance.affise.com/3.0/stats/custom', headers=headers, params=params).json()
 
 print(response)
+
+print('Hi!')
