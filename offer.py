@@ -7,7 +7,7 @@ class Offer:
 		self.offer_id = offer_id
 		self._api_url = 'https://api-lime-finance.affise.com/'
 		self._api_key = 'c666e444eabc1706574ec7973ae4e677'
-		self.raw_data = requests.get(
+		self._raw_data = requests.get(
 			self._api_url + '3.0/stats/custom',
 			headers={'API-Key': self._api_key},
 			params=(
