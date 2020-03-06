@@ -16,11 +16,11 @@ class Offer:
 				('filter[date_to]', date_to),
 				('filter[offer]', self.offer_id)
 				)
-			)
+			).json()
 
 	def get_partner_list(self):
 		partners = []
-		for i in range(len(self._raw_data.json()['stats'])):
-			if self._raw_data.json()['stats'][i]['slice']['affiliate']['id'] not in partners:
-				partners.append(self._raw_data.json()['stats'][i]['slice']['affiliate']['id'])
+		for i in range(len(self._raw_data['stats'])):
+			if self._raw_data['stats'][i]['slice']['affiliate']['id'] not in partners:
+				partners.append(self._raw_data['stats'][i]['slice']['affiliate']['id'])
 		return sorted(partners)
