@@ -1,7 +1,7 @@
 import requests
 import json
 from datetime import date
-from r.clicks import clicks_raw_data
+
 
 api_url = 'https://api-lime-finance.affise.com/'
 api_key = 'c666e444eabc1706574ec7973ae4e677'
