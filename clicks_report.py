@@ -1,6 +1,4 @@
 import requests
-import json
-from datetime import date
 import time
 
 
@@ -22,22 +20,20 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 	return response
 
 
-lim = 50
+lim = 3000
 pg = 1
 final_result = []
 
-print(get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=lim, page=pg)['clicks'])
 
-#
-# while get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=lim, page=pg)['clicks'] != 0:
-# 	start = time.time()
-# 	raw_data = get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=lim, page=pg)
-#
-# 	for click in raw_data['clicks']:
-# 		final_result.append(click)
-#
-# 	pg += 1
-#
-# 	print(time.time() - start)
-#
-# print(final_result)
+while len(get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=lim, page=pg)['clicks']) != 0:
+	start = time.time()
+	raw_data = get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=lim, page=pg)
+
+	for click in raw_data['clicks']:
+		final_result.append(click)
+
+	pg += 1
+	print(raw_data['pagination'])
+	print(time.time() - start)
+
+print(final_result)
