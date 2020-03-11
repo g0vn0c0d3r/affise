@@ -20,7 +20,7 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 	return response
 
 
-lim = 2000
+lim = 5000
 pg = 1
 final_result = []
 
@@ -32,7 +32,7 @@ while len(get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=li
 		final_result.append(click)
 	pg += 1
 	print(raw_data['pagination'])
-	print(time.time() - start)
+	print(time.time() - start1, end='\n')
 
 
 print(time.time() - start1)
