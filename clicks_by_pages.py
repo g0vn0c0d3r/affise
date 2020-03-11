@@ -20,23 +20,27 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 	return response
 
 
-start_date = '2020-03-10'
+start_date = '2020-03-01'
 end_date = '2020-03-10'
-lmt = 100
+lmt = 5000
 
 pages = get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)['pagination']['total_count'] // lmt + 1
 
-final_list = []
-
+final_list = {
+	'count': get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)['pagination']['total_count'],
+	'clicks': []
+}
+# TODO: собирать в файнал лист сразу с фильтром по офферу
 start = time.time()
-
 for page in range(pages):
-	start = time.time()
 	raw_data = get_clicks_data(date_from=start_date, date_to=end_date, limit=lmt, page=(page + 1))
-	for click in raw_data['clicks']:
-		final_list.append(click)
-	print('ready for: ', round((raw_data['pagination']['page'] / pages) * 100, 2), '%')
-	print()
+	for i in range(len(raw_data['clicks'])):
 
-print(time.time() - start)
-print(len(final_list))
+		final_list['clicks'].append(raw_data['clicks'][i])
+	print('ready for: ', round((raw_data['pagination']['page'] / pages) * 100, 2), '%')
+
+print(len(final_list['clicks']))
+
+f = open("dict.txt", "w")
+f.write(str(final_list))
+f.close()
