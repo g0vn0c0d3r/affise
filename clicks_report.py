@@ -36,4 +36,4 @@ while len(get_clicks_data(date_from='2020-03-10', date_to='2020-03-10', limit=li
 	print(raw_data['pagination'])
 	print(time.time() - start)
 
-print(final_result)
+print(len(final_result))
