@@ -27,20 +27,20 @@ lmt = 5000
 pages = get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)['pagination']['total_count'] // lmt + 1
 
 final_list = {
-	'count': get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)['pagination']['total_count'],
 	'clicks': []
 }
+
 # TODO: собирать в файнал лист сразу с фильтром по офферу
 start = time.time()
 for page in range(pages):
 	raw_data = get_clicks_data(date_from=start_date, date_to=end_date, limit=lmt, page=(page + 1))
 	for i in range(len(raw_data['clicks'])):
-
-		final_list['clicks'].append(raw_data['clicks'][i])
+		if raw_data['clicks'][i]['offer']['id'] == 15:
+			final_list['clicks'].append(raw_data['clicks'][i])
 	print('ready for: ', round((raw_data['pagination']['page'] / pages) * 100, 2), '%')
 
-print(len(final_list['clicks']))
+final_list.update({'clicks_count': len(final_list['clicks'])})
 
-f = open("dict.txt", "w")
+f = open("Lime CPL.txt", "w")
 f.write(str(final_list))
 f.close()
