@@ -22,7 +22,7 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 
 start_date = '2020-03-10'
 end_date = '2020-03-10'
-lmt = 1000
+lmt = 2000
 
 pages = get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)['pagination']['total_count'] // lmt + 1
 
