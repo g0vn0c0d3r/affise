@@ -19,7 +19,6 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 		).json()
 	return response
 
-
 start_date = '2020-02-15'
 end_date = '2020-03-11'
 lmt = 5000
