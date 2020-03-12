@@ -1,5 +1,6 @@
 import requests
 import time
+import json
 
 
 api_url = 'https://api-lime-finance.affise.com/'
@@ -19,7 +20,8 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 		).json()
 	return response
 
-start_date = '2020-02-15'
+
+start_date = '2020-03-11'
 end_date = '2020-03-11'
 lmt = 5000
 
@@ -28,7 +30,9 @@ pages = get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)
 final_list = {
 	'clicks': []
 }
+print(type(final_list))
 
+# TODO: собирать в файнал лист сразу с фильтром по офферу
 start = time.time()
 for page in range(pages):
 	raw_data = get_clicks_data(date_from=start_date, date_to=end_date, limit=lmt, page=(page + 1))
@@ -39,6 +43,5 @@ for page in range(pages):
 
 final_list.update({'clicks_count': len(final_list['clicks'])})
 
-f = open("offer15.txt", "w")
-f.write(str(final_list))
-f.close()
+with open('offer15.txt', 'w') as file:
+	file.write(json.dumps(final_list))
