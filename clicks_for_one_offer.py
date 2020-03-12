@@ -29,7 +29,6 @@ final_list = {
 	'clicks': []
 }
 
-# TODO: собирать в файнал лист сразу с фильтром по офферу
 start = time.time()
 for page in range(pages):
 	raw_data = get_clicks_data(date_from=start_date, date_to=end_date, limit=lmt, page=(page + 1))
