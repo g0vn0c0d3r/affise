@@ -43,5 +43,5 @@ for page in range(pages):
 
 final_list.update({'clicks_count': len(final_list['clicks'])})
 
-with open('offer15.txt', 'w') as file:
-	file.write(json.dumps(final_list))
+with open('offer15.json', 'w') as file:
+	json.dump(final_list, file)
