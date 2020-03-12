@@ -20,7 +20,7 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 	return response
 
 
-start_date = '2020-03-01'
+start_date = '2020-02-15'
 end_date = '2020-03-10'
 lmt = 5000
 
