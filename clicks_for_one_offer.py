@@ -20,9 +20,9 @@ def get_clicks_data(*, date_from: str, date_to: str, limit: int, page: int):
 	return response
 
 
-start_date = '2020-03-10'
-end_date = '2020-03-10'
-lmt = 2000
+start_date = '2020-02-15'
+end_date = '2020-03-11'
+lmt = 5000
 
 pages = get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)['pagination']['total_count'] // lmt + 1
 
@@ -41,6 +41,6 @@ for page in range(pages):
 
 final_list.update({'clicks_count': len(final_list['clicks'])})
 
-f = open("Lime CPL.txt", "w")
+f = open("offer15.txt", "w")
 f.write(str(final_list))
 f.close()
