@@ -30,14 +30,18 @@ pages = get_clicks_data(date_from=start_date, date_to=end_date, limit=1, page=1)
 final_list = {
 	'clicks': []
 }
-print(type(final_list))
-
-# TODO: собирать в файнал лист сразу с фильтром по офферу
 start = time.time()
 for page in range(pages):
 	raw_data = get_clicks_data(date_from=start_date, date_to=end_date, limit=lmt, page=(page + 1))
 	for i in range(len(raw_data['clicks'])):
 		if raw_data['clicks'][i]['offer']['id'] == 15:
+			# data = raw_data.get('clicks')[i]
+			# payload = {
+			# 	'sub3': data.get('sub3'),
+			# 	'partner_id': data.get('partner_id'),
+			# 	'has_conversions': data.get('has_conversions')
+			# 	}
+			# print(payload)
 			final_list['clicks'].append(raw_data['clicks'][i])
 	print('ready for: ', round((raw_data['pagination']['page'] / pages) * 100, 2), '%')
 
