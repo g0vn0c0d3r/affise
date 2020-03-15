@@ -67,5 +67,5 @@
 a = '234234'
 print(a.isdigit())
 
-print(a) if a.isdigit() == True el
+print(a) if a.isdigit() is True else
 
