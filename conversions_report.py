@@ -70,5 +70,8 @@ for i in range(len(conversions_list)):
             final_list[j]['revenue'] += conversions_list[i]['revenue']
 
 
+for i in final_list:
+    i['cpa'] = round(i['revenue'] / i['loans'] if i['loans'] != 0 else 0)
+
 for i in sorted(final_list, key=lambda x: x['revenue'], reverse=True):
     print(i)
