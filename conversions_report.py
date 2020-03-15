@@ -31,19 +31,28 @@ pages = get_raw_data(
 conversions_list = []
 for page in range(pages):
     req = get_raw_data(date_from='2020-02-15', date_to='2020-03-14', offer=15, limit=1000, page=(page + 1))
-    # print(len(req['conversions']))
     for conversion in req['conversions']:
         affiliate = conversion['partner']['id']
-        webmaster = int(conversion['sub3']) if conversion['sub3'].isdigit() == True
+        webmaster = conversion['sub3']
+        registration = 1 if conversion['goal_value'] == '1' else 0
+        loan = 1 if conversion['goal_value'] == '2' else 0
+
+        revenue = conversion['revenue']
 
         payload = {
             'affiliate': affiliate,
-            'webmaster': if conversion['sub3'].isdigit() == True: conversion['sub3']
+            'webmaster': webmaster,
+            'registrations': registration,
+            'loans': loan,
+            'revenue': revenue
 
         }
-        print(payload)
 
+        conversions_list.append(payload)
+print(len(conversions_list))
 
+# for i in conversions_list:
+#     print(i)
 
 # lst = []
 #
