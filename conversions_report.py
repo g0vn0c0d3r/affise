@@ -49,53 +49,26 @@ for page in range(pages):
         }
 
         conversions_list.append(payload)
-print(len(conversions_list))
 
-# for i in conversions_list:
-#     print(i)
+final_list = []
+for i in range(len(conversions_list)):
+    payload = {
+        'affiliate': conversions_list[i]['affiliate'],
+        'webmaster': conversions_list[i]['webmaster'],
+        'registrations': 0,
+        'loans': 0,
+        'revenue': 0
+    }
+    if payload not in final_list:
+        final_list.append(payload)
 
-# lst = []
-#
-# for i in range(len(conversions_data['conversions'])):
-#     data = conversions_data['conversions'][i]
-#
-#     payload = {
-#         'affiliate': data['partner']['id'],
-#         'webmaster': int(data['sub3']),
-#         'registrations': 1 if data['goal_value'] == '1' else 0,
-#         'loans': 1 if data['goal_value'] == '2' else 0,
-#         'revenue': data['revenue']
-#     }
-#     lst.append(payload)
-#
-# # print()
-#
-# lst = sorted(lst, key=lambda x: x['webmaster'])
-# # for i in lst:
-# #     print(i)
-#
-# new_list = []
-# for i in range(len(lst)):
-#     payload = {
-#         'affiliate': lst[i].get('affiliate'),
-#         'webmaster': lst[i].get('webmaster'),
-#         'registrations': 0,
-#         'loans': 0,
-#         'revenue': 0
-#     }
-#     if payload not in new_list:
-#         new_list.append(payload)
-# # print()
-# # for i in new_list:
-# #     print(i)
-#
-#
-# for i in range(len(lst)):
-#     for j in range(len(new_list)):
-#         if lst[i].get('affiliate') == new_list[j].get('affiliate') and lst[i].get('webmaster') == new_list[j].get('webmaster'):
-#             new_list[j]['registrations'] += lst[i]['registrations']
-#             new_list[j]['loans'] += lst[i]['loans']
-#             new_list[j]['revenue'] += lst[i]['revenue']
-#
-# for i in sorted(new_list, key=lambda x: x['revenue'], reverse=True):
-#     print(i)
+for i in range(len(conversions_list)):
+    for j in range(len(final_list)):
+        if final_list[j]['affiliate'] == conversions_list[i]['affiliate'] and final_list[j]['webmaster'] == conversions_list[i]['webmaster']:
+            final_list[j]['registrations'] += conversions_list[i]['registrations']
+            final_list[j]['loans'] += conversions_list[i]['loans']
+            final_list[j]['revenue'] += conversions_list[i]['revenue']
+
+
+for i in sorted(final_list, key=lambda x: x['revenue'], reverse=True):
+    print(i)
