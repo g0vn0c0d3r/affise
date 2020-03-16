@@ -1,4 +1,5 @@
 import requests
+from custom_clicks import clicks
 
 api_url = 'https://api-lime-finance.affise.com/'
 api_key = 'c666e444eabc1706574ec7973ae4e677'
@@ -21,16 +22,16 @@ def get_raw_data(*, date_from, date_to, offer, limit, page):
 
 
 pages = get_raw_data(
-    date_from='2020-02-15',
-    date_to='2020-03-15',
+    date_from='2020-02-16',
+    date_to='2020-03-16',
     offer=15,
     limit=1,
-    page=1)['pagination']['total_count'] // 1000 + 1
+    page=1)['pagination']['total_count'] // 5000 + 1
 
 
 conversions_list = []
 for page in range(pages):
-    req = get_raw_data(date_from='2020-02-15', date_to='2020-03-15', offer=15, limit=1000, page=(page + 1))
+    req = get_raw_data(date_from='2020-02-15', date_to='2020-03-16', offer=15, limit=5000, page=(page + 1))
     for conversion in req['conversions']:
         affiliate = conversion['partner']['id']
         webmaster = conversion['sub3']
@@ -68,6 +69,12 @@ for i in range(len(conversions_list)):
             final_list[j]['loans'] += conversions_list[i]['loans']
             final_list[j]['revenue'] += conversions_list[i]['revenue']
             final_list[j]['cpa'] = round(final_list[j]['revenue'] / final_list[j]['loans'] if final_list[j]['loans'] != 0 else 0)
+
+for i in range(len(final_list)):
+    for j in range(len(clicks['stats'])):
+        if final_list[i]['affiliate'] == clicks['stats'][j]['slice']['affiliate']['id'] and final_list[i]['webmaster'] == clicks['stats'][j]['slice']['sub3']:
+            final_list[i]['clicks'] = int(clicks['stats'][j]['traffic']['raw'])
+            final_list[i]['epc'] = round(final_list[i]['revenue'] / final_list[i]['clicks'], 1)
 
 
 for i in sorted(final_list, key=lambda x: x['revenue'], reverse=True):
