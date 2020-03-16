@@ -14,15 +14,15 @@ def get_raw_data(*, date_from, date_to, offer, limit, page):
             ('offer', offer),
             ('limit', limit),
             ('page', page),
-        )
-    ).json()
+            )
+        ).json()
 
     return r
 
 
 pages = get_raw_data(
     date_from='2020-02-15',
-    date_to='2020-03-14',
+    date_to='2020-03-15',
     offer=15,
     limit=1,
     page=1)['pagination']['total_count'] // 1000 + 1
@@ -30,13 +30,12 @@ pages = get_raw_data(
 
 conversions_list = []
 for page in range(pages):
-    req = get_raw_data(date_from='2020-02-15', date_to='2020-03-14', offer=15, limit=1000, page=(page + 1))
+    req = get_raw_data(date_from='2020-02-15', date_to='2020-03-15', offer=15, limit=1000, page=(page + 1))
     for conversion in req['conversions']:
         affiliate = conversion['partner']['id']
         webmaster = conversion['sub3']
         registration = 1 if conversion['goal_value'] == '1' else 0
         loan = 1 if conversion['goal_value'] == '2' else 0
-
         revenue = conversion['revenue']
 
         payload = {
@@ -68,10 +67,8 @@ for i in range(len(conversions_list)):
             final_list[j]['registrations'] += conversions_list[i]['registrations']
             final_list[j]['loans'] += conversions_list[i]['loans']
             final_list[j]['revenue'] += conversions_list[i]['revenue']
+            final_list[j]['cpa'] = round(final_list[j]['revenue'] / final_list[j]['loans'] if final_list[j]['loans'] != 0 else 0)
 
-
-for i in final_list:
-    i['cpa'] = round(i['revenue'] / i['loans'] if i['loans'] != 0 else 0)
 
 for i in sorted(final_list, key=lambda x: x['revenue'], reverse=True):
     print(i)
