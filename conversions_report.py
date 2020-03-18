@@ -1,8 +1,12 @@
 import requests
+from time import time
 from custom_clicks import clicks
 
 api_url = 'https://api-lime-finance.affise.com/'
 api_key = 'c666e444eabc1706574ec7973ae4e677'
+
+start = '2020-02-15'
+stop = time()
 
 
 def get_raw_data(*, date_from, date_to, offer, limit, page):
@@ -22,8 +26,8 @@ def get_raw_data(*, date_from, date_to, offer, limit, page):
 
 
 pages = get_raw_data(
-    date_from='2020-02-16',
-    date_to='2020-03-16',
+    date_from=start,
+    date_to=stop,
     offer=15,
     limit=1,
     page=1)['pagination']['total_count'] // 5000 + 1
@@ -31,7 +35,7 @@ pages = get_raw_data(
 
 conversions_list = []
 for page in range(pages):
-    req = get_raw_data(date_from='2020-02-15', date_to='2020-03-16', offer=15, limit=5000, page=(page + 1))
+    req = get_raw_data(date_from=start, date_to=stop, offer=15, limit=5000, page=(page + 1))
     for conversion in req['conversions']:
         affiliate = conversion['partner']['id']
         webmaster = conversion['sub3']
@@ -45,9 +49,7 @@ for page in range(pages):
             'registrations': registration,
             'loans': loan,
             'revenue': revenue
-
-        }
-
+            }
         conversions_list.append(payload)
 
 
