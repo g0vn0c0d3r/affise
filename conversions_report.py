@@ -1,12 +1,13 @@
 import requests
-from time import time
 from custom_clicks import clicks
+from datetime import date
+
 
 api_url = 'https://api-lime-finance.affise.com/'
 api_key = 'c666e444eabc1706574ec7973ae4e677'
 
-start = '2020-02-15'
-stop = time()
+start = '2020-03-01'
+stop = date.today()
 
 
 def get_raw_data(*, date_from, date_to, offer, limit, page):
@@ -67,17 +68,23 @@ for i in range(len(conversions_list)):
 
 for i in range(len(conversions_list)):
     for j in range(len(final_list)):
-        if final_list[j]['affiliate'] == conversions_list[i]['affiliate'] and final_list[j]['webmaster'] == conversions_list[i]['webmaster']:
+        if final_list[j]['affiliate'] == conversions_list[i]['affiliate'] and \
+                final_list[j]['webmaster'] == conversions_list[i]['webmaster']:
             final_list[j]['registrations'] += conversions_list[i]['registrations']
             final_list[j]['loans'] += conversions_list[i]['loans']
             final_list[j]['revenue'] += conversions_list[i]['revenue']
-            final_list[j]['cpa'] = round(final_list[j]['revenue'] / final_list[j]['loans'] if final_list[j]['loans'] != 0 else 0)
+            final_list[j]['CPL'] = round(final_list[j]['revenue'] / (final_list[j]['registrations'] + final_list[j]['loans']) if
+                                         (final_list[j]['registrations'] + final_list[j]['loans']) != 0 else 0)
+            final_list[j]['CPS'] = round(final_list[j]['revenue'] / final_list[j]['loans'] if
+                                         final_list[j]['loans'] != 0 else 0)
 
 for i in range(len(final_list)):
     for j in range(len(clicks['stats'])):
-        if final_list[i]['affiliate'] == clicks['stats'][j]['slice']['affiliate']['id'] and final_list[i]['webmaster'] == clicks['stats'][j]['slice']['sub3']:
+        if final_list[i]['affiliate'] == clicks['stats'][j]['slice']['affiliate']['id'] and \
+                final_list[i]['webmaster'] == clicks['stats'][j]['slice']['sub3']:
             final_list[i]['clicks'] = int(clicks['stats'][j]['traffic']['raw'])
-            final_list[i]['epc'] = round(final_list[i]['revenue'] / final_list[i]['clicks'], 1)
+            final_list[i]['epc'] = round(final_list[i]['revenue'] / final_list[i]['clicks'], 1) if \
+                final_list[i]['clicks'] != 0 else 0
 
 
 for i in sorted(final_list, key=lambda x: x['revenue'], reverse=True):
