@@ -1,4 +1,3 @@
-import Affise.Constants
 
 
 class Offer:
@@ -6,8 +5,3 @@ class Offer:
 
     def __init__(self, offer_id):
         self.offer_id = offer_id
-
-
-Lime = Offer(Affise.Constants.OfferId.lime.value)
-
-print(Lime.offer_id)
