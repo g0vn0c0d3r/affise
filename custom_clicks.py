@@ -11,10 +11,11 @@ clicks = requests.get(
 	headers={'API-Key': api_key},
 	params=(
 		('slice[]', ['affiliate', 'sub3']),
-		('filter[date_from]', '2020-02-20'),
+		('filter[date_from]', '2020-03-01'),
 		('filter[date_to]', date.today()),
 		('filter[offer]', 15),
 	)
 ).json()
 
-print(clicks)
+# for i in range(len(clicks['stats'])):
+# 	print(clicks['stats'][i])

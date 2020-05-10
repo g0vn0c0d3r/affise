@@ -1,16 +1,15 @@
 import requests
-from custom_clicks import clicks
-from datetime import date
-
+import pandas as pd
+import numpy as np
 
 api_url = 'https://api-lime-finance.affise.com/'
-api_key = 'c666e444eabc1706574ec7973ae4e677'
+api_key = '1ad6cf31c5fbcfb05cf7be2529d6d5cb'
 
-start = '2020-03-01'
-stop = date.today()
+start = '2020-04-01'
+stop = '2020-04-30'
 
 
-def get_raw_data(*, date_from, date_to, offer, limit, page):
+def get_raw_data(*, date_from, date_to, offer, status, limit, page):
     r = requests.get(
         api_url + '3.0/stats/conversions',
         headers={'API-Key': api_key},
@@ -18,6 +17,7 @@ def get_raw_data(*, date_from, date_to, offer, limit, page):
             ('date_from', date_from),
             ('date_to', date_to),
             ('offer', offer),
+            ('status', status),
             ('limit', limit),
             ('page', page),
             )
@@ -26,66 +26,45 @@ def get_raw_data(*, date_from, date_to, offer, limit, page):
     return r
 
 
-pages = get_raw_data(
-    date_from=start,
-    date_to=stop,
-    offer=15,
-    limit=1,
-    page=1)['pagination']['total_count'] // 5000 + 1
+monthly_data = get_raw_data(date_from=start, date_to=stop, offer=7, status=1, limit=5000, page=1)
+
+data_table = []
+for item in range(len(monthly_data['conversions'])):
+    partner_id = monthly_data['conversions'][item]['partner_id']
+    partner_name = monthly_data['conversions'][item]['partner']['name']
+    goal_name = monthly_data['conversions'][item]['goal']
+    goal_value = round(monthly_data['conversions'][item]['revenue'])
+    conversion_id = monthly_data['conversions'][item]['conversion_id']
+    click_id = monthly_data['conversions'][item]['clickid']
+    created_at = monthly_data['conversions'][item]['created_at']
+    webmaster_id = monthly_data['conversions'][item]['sub3']
+
+    data_table.append([
+        partner_id,
+        partner_name,
+        goal_name,
+        goal_value,
+        conversion_id,
+        click_id,
+        created_at,
+        webmaster_id
+
+    ])
 
 
-conversions_list = []
-for page in range(pages):
-    req = get_raw_data(date_from=start, date_to=stop, offer=15, limit=5000, page=(page + 1))
-    for conversion in req['conversions']:
-        affiliate = conversion['partner']['id']
-        webmaster = conversion['sub3']
-        registration = 1 if conversion['goal_value'] == '1' else 0
-        loan = 1 if conversion['goal_value'] == '2' else 0
-        revenue = conversion['revenue']
+df = pd.DataFrame(data=data_table,
+                  columns=[
+                      'partner_id',
+                      'partner_name',
+                      'goal_name',
+                      'goal_value',
+                      'conversion_id',
+                      'click_id',
+                      'created_at',
+                      'webmaster_id'])
+sample = df.head(30)
+print(sample)
 
-        payload = {
-            'affiliate': affiliate,
-            'webmaster': webmaster,
-            'registrations': registration,
-            'loans': loan,
-            'revenue': revenue
-            }
-        conversions_list.append(payload)
-
-
-final_list = []
-for i in range(len(conversions_list)):
-    payload = {
-        'affiliate': conversions_list[i]['affiliate'],
-        'webmaster': conversions_list[i]['webmaster'],
-        'registrations': 0,
-        'loans': 0,
-        'revenue': 0
-    }
-    if payload not in final_list:
-        final_list.append(payload)
-
-for i in range(len(conversions_list)):
-    for j in range(len(final_list)):
-        if final_list[j]['affiliate'] == conversions_list[i]['affiliate'] and \
-                final_list[j]['webmaster'] == conversions_list[i]['webmaster']:
-            final_list[j]['registrations'] += conversions_list[i]['registrations']
-            final_list[j]['loans'] += conversions_list[i]['loans']
-            final_list[j]['revenue'] += conversions_list[i]['revenue']
-            final_list[j]['CPL'] = round(final_list[j]['revenue'] / (final_list[j]['registrations'] + final_list[j]['loans']) if
-                                         (final_list[j]['registrations'] + final_list[j]['loans']) != 0 else 0)
-            final_list[j]['CPS'] = round(final_list[j]['revenue'] / final_list[j]['loans'] if
-                                         final_list[j]['loans'] != 0 else 0)
-
-for i in range(len(final_list)):
-    for j in range(len(clicks['stats'])):
-        if final_list[i]['affiliate'] == clicks['stats'][j]['slice']['affiliate']['id'] and \
-                final_list[i]['webmaster'] == clicks['stats'][j]['slice']['sub3']:
-            final_list[i]['clicks'] = int(clicks['stats'][j]['traffic']['raw'])
-            final_list[i]['epc'] = round(final_list[i]['revenue'] / final_list[i]['clicks'], 1) if \
-                final_list[i]['clicks'] != 0 else 0
-
-
-for i in sorted(final_list, key=lambda x: x['revenue'], reverse=True):
-    print(i)
+table = pd.pivot_table(df, index=['partner_id', 'partner_name'], columns='goal_name', values='goal_value', aggfunc='count', fill_value=0, margins=True)
+table.sort_values(by='All', ascending=False, inplace=True)
+print(table)
