@@ -12,9 +12,9 @@ class Offer:
     def __init__(self, offer_id):
         self.offer_id = offer_id
 
-    # TODO: написать функцию подсчета страниц
-
     def get_pivot_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+        # TODO: подумать на инпутом
+        # TODO: написать функцию подсчета страниц
         response = self._api_conversions_request(
             date_from=date_from,
             date_to=date_to,
@@ -33,6 +33,7 @@ class Offer:
         return pivot_table
 
     def get_csv_for_all_partners(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+        # TODO: написать функцию подсчета страниц
         response = self._api_conversions_request(
             date_from=date_from,
             date_to=date_to,
@@ -47,7 +48,7 @@ class Offer:
         data_frame = self._create_data_frame(data_table)
 
         path = 'reports/'
-
+        # TODO: написать функцию генерации отчета
         for partner in unique_partner_list:
             unique_partner_report = data_frame[data_frame['partner_id'] == partner]
             unique_partner_report.reset_index(drop=True, inplace=True)
