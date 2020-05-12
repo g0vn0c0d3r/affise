@@ -51,7 +51,7 @@ class Offer:
 
         for partner in unique_partner_list:
             unique_partner_report = data_frame[data_frame['partner_id'] == partner]
-            unique_partner_report.to_csv(str(f'{partner}') + '-' + str(f'{date_from}') + '-' + str(f'{date_to}'))
+            unique_partner_report.to_csv(str('id_' + f'{partner}') + '_' + str(f'{date_from}') + '_' + str(f'{date_to}'))
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
