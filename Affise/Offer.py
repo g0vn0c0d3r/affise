@@ -12,7 +12,7 @@ class Offer:
         self.offer_id = offer_id
 
     def get_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
-        response = self.api_conversions_request(
+        response = self._api_conversions_request(
             date_from=date_from,
             date_to=date_to,
             status=status,
@@ -21,11 +21,11 @@ class Offer:
 
         pages = response['pagination']['total_count'] // self.__page_limit + 1
 
-        conversion_list = self.create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
+        conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
 
-        data_table = self.create_data_table(conversion_list)
-        data_frame = self.create_data_frame(data_table)
-        pivot_table = self.create_pivot_table(data_frame,
+        data_table = self._create_data_table(conversion_list)
+        data_frame = self._create_data_frame(data_table)
+        pivot_table = self._create_pivot_table(data_frame,
                                               index=['partner_id', 'partner_name'],
                                               columns='goal_name',
                                               values='goal_value',
@@ -35,7 +35,7 @@ class Offer:
                                               )
         return pivot_table
 
-    def api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
+    def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
             self.__api_url + '3.0/stats/conversions',
             headers={'API-Key': self.__api_key},
@@ -49,17 +49,17 @@ class Offer:
             ).json()
         return response
 
-    def create_conversion_list(self, pages, date_from, date_to, status):
+    def _create_conversion_list(self, pages, date_from, date_to, status):
         conversion_list = []
         for page in range(pages):
-            r = self.api_conversions_request(date_from=date_from, date_to=date_to, status=status, page=page+1)
+            r = self._api_conversions_request(date_from=date_from, date_to=date_to, status=status, page=page+1)
             for conversion in r['conversions']:
                 conversion_list.append(conversion)
 
         return conversion_list
 
     @staticmethod
-    def create_data_table(conversion_list):
+    def _create_data_table(conversion_list):
         data_table = []
         for conversion in conversion_list:
                 partner_id = conversion['partner_id']
@@ -84,7 +84,7 @@ class Offer:
         return data_table
 
     @staticmethod
-    def create_data_frame(data_table):
+    def _create_data_frame(data_table):
         data_frame = pd.DataFrame(data=data_table,
                                   columns=[
                                       'partner_id',
@@ -99,7 +99,7 @@ class Offer:
         return data_frame
 
     @staticmethod
-    def create_pivot_table(data_frame, *, index, columns, values, aggfunc, fill_value, margins):
+    def _create_pivot_table(data_frame, *, index, columns, values, aggfunc, fill_value, margins):
         pivot_table = pd.pivot_table(data_frame, index=index, columns=columns, values=values,
                                      aggfunc=aggfunc, fill_value=fill_value, margins=margins)
         return pivot_table
