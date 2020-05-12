@@ -26,7 +26,7 @@ class Offer:
         data_table = self.create_data_table(conversion_list)
         data_frame = self.create_data_frame(data_table)
         pivot_table = self.create_pivot_table(data_frame,
-                                              index='partner_id',
+                                              index=['partner_id', 'partner_name'],
                                               columns='goal_name',
                                               values='goal_value',
                                               aggfunc='count',
