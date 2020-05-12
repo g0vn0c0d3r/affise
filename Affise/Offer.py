@@ -1,5 +1,6 @@
 import requests
 from Affise.Constants import ConversionStatus
+from Affise.Constants import OfferId
 import pandas as pd
 
 
@@ -25,14 +26,7 @@ class Offer:
 
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
-        pivot_table = self._create_pivot_table(data_frame,
-                                              index=['partner_id', 'partner_name'],
-                                              columns='goal_name',
-                                              values='goal_value',
-                                              aggfunc='count',
-                                              fill_value=0,
-                                              margins=True
-                                              )
+        pivot_table = self._create_pivot_table(data_frame, index=['partner_id', 'partner_name'], columns='goal_name', values='goal_value', aggfunc='count', fill_value=0, margins=True)
         return pivot_table
 
     def get_csv_for_all_partners(self, date_from, date_to, status=ConversionStatus.confirmed.value):
@@ -49,9 +43,12 @@ class Offer:
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
 
+        path = 'reports/'
+
         for partner in unique_partner_list:
             unique_partner_report = data_frame[data_frame['partner_id'] == partner]
-            unique_partner_report.to_csv(str('id_' + f'{partner}') + '_' + str(f'{date_from}') + '_' + str(f'{date_to}'))
+            unique_partner_report.reset_index(drop=True, inplace=True)
+            unique_partner_report.to_csv(path + str(str(f'{OfferId(self.offer_id).name}') + '_' + 'pid_' + f'{partner}') + '_' + str(f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
