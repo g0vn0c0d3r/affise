@@ -12,6 +12,8 @@ class Offer:
     def __init__(self, offer_id):
         self.offer_id = offer_id
 
+    # TODO: написать функцию подсчета страниц
+
     def get_pivot_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         response = self._api_conversions_request(
             date_from=date_from,
@@ -26,7 +28,8 @@ class Offer:
 
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
-        pivot_table = self._create_pivot_table(data_frame, index=['partner_id', 'partner_name'], columns='goal_name', values='goal_value', aggfunc='count', fill_value=0, margins=True)
+        pivot_table = self._create_pivot_table(data_frame, index=['partner_id', 'partner_name'], columns='goal_name',
+                                               values='goal_value', aggfunc='count', fill_value=0, margins=True)
         return pivot_table
 
     def get_csv_for_all_partners(self, date_from, date_to, status=ConversionStatus.confirmed.value):
@@ -48,7 +51,9 @@ class Offer:
         for partner in unique_partner_list:
             unique_partner_report = data_frame[data_frame['partner_id'] == partner]
             unique_partner_report.reset_index(drop=True, inplace=True)
-            unique_partner_report.to_csv(path + str(str(f'{OfferId(self.offer_id).name}') + '_' + 'pid_' + f'{partner}') + '_' + str(f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
+            unique_partner_report.to_csv(
+                path + str(str(f'{OfferId(self.offer_id).name}') + '_' + 'pid_' + f'{partner}') + '_' + str(
+                    f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
@@ -61,13 +66,13 @@ class Offer:
                 ('status', status),
                 ('limit', limit),
                 ('page', page))
-            ).json()
+        ).json()
         return response
 
     def _create_conversion_list(self, pages, date_from, date_to, status):
         conversion_list = []
         for page in range(pages):
-            r = self._api_conversions_request(date_from=date_from, date_to=date_to, status=status, page=page+1)
+            r = self._api_conversions_request(date_from=date_from, date_to=date_to, status=status, page=page + 1)
             for conversion in r['conversions']:
                 conversion_list.append(conversion)
 
@@ -77,25 +82,25 @@ class Offer:
     def _create_data_table(conversion_list):
         data_table = []
         for conversion in conversion_list:
-                partner_id = conversion['partner_id']
-                partner_name = conversion['partner']['name']
-                goal_name = conversion['goal']
-                goal_value = round(conversion['revenue'])
-                conversion_id = conversion['conversion_id']
-                click_id = conversion['clickid']
-                created_at = conversion['created_at']
-                webmaster_id = conversion['sub3']
+            partner_id = conversion['partner_id']
+            partner_name = conversion['partner']['name']
+            goal_name = conversion['goal']
+            goal_value = round(conversion['revenue'])
+            conversion_id = conversion['conversion_id']
+            click_id = conversion['clickid']
+            created_at = conversion['created_at']
+            webmaster_id = conversion['sub3']
 
-                data_table.append([
-                    partner_id,
-                    partner_name,
-                    goal_name,
-                    goal_value,
-                    conversion_id,
-                    click_id,
-                    created_at,
-                    webmaster_id
-                ])
+            data_table.append([
+                partner_id,
+                partner_name,
+                goal_name,
+                goal_value,
+                conversion_id,
+                click_id,
+                created_at,
+                webmaster_id
+            ])
         return data_table
 
     @staticmethod
@@ -127,25 +132,3 @@ class Offer:
             if partner_id not in unique_partner_list:
                 unique_partner_list.append(partner_id)
         return unique_partner_list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
