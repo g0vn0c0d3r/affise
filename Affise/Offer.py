@@ -11,7 +11,7 @@ class Offer:
     def __init__(self, offer_id):
         self.offer_id = offer_id
 
-    def get_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+    def get_pivot_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         response = self._api_conversions_request(
             date_from=date_from,
             date_to=date_to,
@@ -34,6 +34,20 @@ class Offer:
                                               margins=True
                                               )
         return pivot_table
+
+    def get_csv_for_all_partners(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+        response = self._api_conversions_request(
+            date_from=date_from,
+            date_to=date_to,
+            status=status,
+            limit=1
+        )
+
+        pages = response['pagination']['total_count'] // self.__page_limit + 1
+        conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
+        unique_partner_list = sorted(self._get_unique_partner_list(conversion_list))
+
+        return unique_partner_list
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
@@ -103,6 +117,15 @@ class Offer:
         pivot_table = pd.pivot_table(data_frame, index=index, columns=columns, values=values,
                                      aggfunc=aggfunc, fill_value=fill_value, margins=margins)
         return pivot_table
+
+    @staticmethod
+    def _get_unique_partner_list(conversion_list):
+        unique_partner_list = []
+        for conversion in conversion_list:
+            partner_id = conversion['partner']['id']
+            if partner_id not in unique_partner_list:
+                unique_partner_list.append(partner_id)
+        return unique_partner_list
 
 
 
