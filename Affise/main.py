@@ -8,3 +8,5 @@ konga = Offer(offer_id=OfferId.konga.value)
 
 lm = lime.get_csv_for_all_partners(date_from='2020-05-01', date_to='2020-05-30')
 print(lm)
+
+# print(lm.iloc[0:5, 0:5])

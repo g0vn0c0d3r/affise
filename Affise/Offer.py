@@ -46,8 +46,12 @@ class Offer:
         pages = response['pagination']['total_count'] // self.__page_limit + 1
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         unique_partner_list = sorted(self._get_unique_partner_list(conversion_list))
+        data_table = self._create_data_table(conversion_list)
+        data_frame = self._create_data_frame(data_table)
 
-        return unique_partner_list
+        for partner in unique_partner_list:
+            unique_partner_report = data_frame[data_frame['partner_id'] == partner]
+            unique_partner_report.to_csv(str(f'{partner}') + '-' + str(f'{date_from}') + '-' + str(f'{date_to}'))
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
