@@ -6,6 +6,9 @@ from Affise.Constants import ConversionStatus
 lime = Offer(offer_id=OfferId.lime.value)
 konga = Offer(offer_id=OfferId.konga.value)
 
-lime.get_csv_for_all_partners(date_from='2020-04-01', date_to='2020-04-30')
+# lime.get_csv_for_all_partners(date_from='2020-04-01', date_to='2020-04-30')
+# konga.get_csv_for_all_partners(date_from='2020-04-01', date_to='2020-04-30')
+
+print(lime.get_pivot_sverka(date_from='2020-04-01', date_to='2020-04-30'))
 
 

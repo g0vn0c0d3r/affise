@@ -14,18 +14,8 @@ class Offer:
 
     def get_pivot_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         # TODO: подумать на инпутом
-        # TODO: написать функцию подсчета страниц
-        response = self._api_conversions_request(
-            date_from=date_from,
-            date_to=date_to,
-            status=status,
-            limit=1
-        )
-
-        pages = response['pagination']['total_count'] // self.__page_limit + 1
-
+        pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
-
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
         pivot_table = self._create_pivot_table(data_frame, index=['partner_id', 'partner_name'], columns='goal_name',
@@ -33,15 +23,7 @@ class Offer:
         return pivot_table
 
     def get_csv_for_all_partners(self, date_from, date_to, status=ConversionStatus.confirmed.value):
-        # TODO: написать функцию подсчета страниц
-        response = self._api_conversions_request(
-            date_from=date_from,
-            date_to=date_to,
-            status=status,
-            limit=1
-        )
-
-        pages = response['pagination']['total_count'] // self.__page_limit + 1
+        pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         unique_partner_list = sorted(self._get_unique_partner_list(conversion_list))
         data_table = self._create_data_table(conversion_list)
@@ -69,6 +51,18 @@ class Offer:
                 ('page', page))
         ).json()
         return response
+
+    def _count_pages(self, date_from, date_to, status):
+
+        response = self._api_conversions_request(
+            date_from=date_from,
+            date_to=date_to,
+            status=status,
+            limit=1
+        )
+
+        pages = response['pagination']['total_count'] // self.__page_limit + 1
+        return pages
 
     def _create_conversion_list(self, pages, date_from, date_to, status):
         conversion_list = []
