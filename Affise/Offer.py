@@ -22,14 +22,14 @@ class Offer:
                                                values='goal_value', aggfunc='count', fill_value=0, margins=True)
         return pivot_table
 
-    def get_csv_for_all_partners(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+    def get_csv_reports(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         unique_partner_list = sorted(self._get_unique_partner_list(conversion_list))
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
 
-        path = 'reports/'
+        path = 'reports/april/'
         # TODO: написать функцию генерации отчета
         for partner in unique_partner_list:
             unique_partner_report = data_frame[data_frame['partner_id'] == partner]
