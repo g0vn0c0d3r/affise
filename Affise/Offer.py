@@ -81,20 +81,24 @@ class Offer:
             partner_name = conversion['partner']['name']
             goal_name = conversion['goal']
             goal_value = round(conversion['revenue'])
-            conversion_id = conversion['conversion_id']
+            action_id = conversion['action_id']
             click_id = conversion['clickid']
             created_at = conversion['created_at']
-            webmaster_id = conversion['sub3']
+            sub1 = conversion['sub1']
+            sub2 = conversion['sub2']
+            sub3 = conversion['sub3']
 
             data_table.append([
                 partner_id,
                 partner_name,
                 goal_name,
                 goal_value,
-                conversion_id,
+                action_id,
                 click_id,
                 created_at,
-                webmaster_id
+                sub1,
+                sub2,
+                sub3
             ])
         return data_table
 
@@ -106,10 +110,13 @@ class Offer:
                                       'partner_name',
                                       'goal_name',
                                       'goal_value',
-                                      'conversion_id',
+                                      'action_id',
                                       'click_id',
                                       'created_at',
-                                      'webmaster_id']
+                                      'sub1',
+                                      'sub2',
+                                      'sub3'
+                                  ]
                                   )
         return data_frame
 
@@ -127,3 +134,4 @@ class Offer:
             if partner_id not in unique_partner_list:
                 unique_partner_list.append(partner_id)
         return unique_partner_list
+
