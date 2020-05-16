@@ -20,6 +20,7 @@ class Offer:
         data_frame = self._create_data_frame(data_table)
         pivot_table = self._create_pivot_table(data_frame, index=['partner_id', 'partner_name'], columns='goal_name',
                                                values='goal_value', aggfunc='count', fill_value=0, margins=True)
+        pivot_table.sort_values(by='All', ascending=False, inplace=True)
         return pivot_table
 
     def get_csv_reports(self, date_from, date_to, status=ConversionStatus.confirmed.value):
@@ -83,7 +84,7 @@ class Offer:
             goal_value = round(conversion['revenue'])
             action_id = conversion['action_id']
             click_id = conversion['clickid']
-            created_at = conversion['created_at']
+            date = conversion['created_at'].split(' ')[0]
             sub1 = conversion['sub1']
             sub2 = conversion['sub2']
             sub3 = conversion['sub3']
@@ -95,7 +96,7 @@ class Offer:
                 goal_value,
                 action_id,
                 click_id,
-                created_at,
+                date,
                 sub1,
                 sub2,
                 sub3
@@ -112,7 +113,7 @@ class Offer:
                                       'goal_value',
                                       'action_id',
                                       'click_id',
-                                      'created_at',
+                                      'date',
                                       'sub1',
                                       'sub2',
                                       'sub3'
