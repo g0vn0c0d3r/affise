@@ -12,7 +12,7 @@ class Offer:
     def __init__(self, offer_id):
         self.offer_id = offer_id
 
-    def get_pivot_sverka(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+    def get_aggregated_monthly_stats(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         # TODO: подумать на инпутом
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
@@ -22,6 +22,17 @@ class Offer:
                                                values='goal_value', aggfunc='count', fill_value=0, margins=True)
         pivot_table.sort_values(by='All', ascending=False, inplace=True)
         return pivot_table
+
+    def get_daily_stats(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+        pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
+        conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
+        data_table = self._create_data_table(conversion_list)
+        data_frame = self._create_data_frame(data_table)
+        pivot_table = self._create_pivot_table(data_frame, index='date', columns='partner_name', aggfunc='count',
+                                               values='goal_value', margins=True, fill_value=0)
+        pivot_table.sort_values(by=['All'], axis=1, inplace=True, ascending=False)
+        pivot_table.to_csv('daily_stats.csv')
+
 
     def get_csv_reports(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
@@ -135,4 +146,3 @@ class Offer:
             if partner_id not in unique_partner_list:
                 unique_partner_list.append(partner_id)
         return unique_partner_list
-
