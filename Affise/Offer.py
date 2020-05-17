@@ -31,7 +31,8 @@ class Offer:
         pivot_table = self._create_pivot_table(data_frame, index='date', columns='partner_name', aggfunc='count',
                                                values='goal_value', margins=True, fill_value=0)
         pivot_table.sort_values(by=['All'], axis=1, inplace=True, ascending=False)
-        pivot_table.to_csv('daily_stats.csv')
+
+        return pivot_table
 
 
     def get_csv_reports(self, date_from, date_to, status=ConversionStatus.confirmed.value):
