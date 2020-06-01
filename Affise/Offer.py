@@ -14,7 +14,6 @@ class Offer:
 
     # DONE
     def get_aggregated_monthly_stats(self, *, date_from: str, date_to: str, status=ConversionStatus.confirmed.value):
-        # TODO: подумать на инпутом
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         data_table = self._create_data_table(conversion_list)
