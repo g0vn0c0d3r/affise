@@ -12,3 +12,4 @@ lime.get_webmaster_daily_stats(date_from='2020-05-01', date_to='2020-05-31').to_
 # print()
 # result = lime.get_partners_daily_stat(date_from='2020-06-01', date_to='2020-06-31')
 # print(result.iloc[:, 0:7])
+print(hi)
