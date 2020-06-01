@@ -18,9 +18,9 @@ class Offer:
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
-        pivot_table = self._create_pivot_table(data_frame, index=['partner_id', 'partner_name'], columns='goal_name',
+        pivot_table = self._create_pivot_table(data_frame, index='partner_name', columns='goal_name',
                                                values='goal_value', aggfunc='count', fill_value=0, margins=True)
-        pivot_table.sort_values(by='All', ascending=False, inplace=True)
+        pivot_table.sort_values(by=['All'], axis=0, ascending=False, inplace=True)
         return pivot_table
 
     # DONE
@@ -31,7 +31,19 @@ class Offer:
         data_frame = self._create_data_frame(data_table)
         pivot_table = self._create_pivot_table(data_frame, index='date', columns='partner_name', aggfunc='count',
                                                values='goal_value', margins=True, fill_value=0)
-        pivot_table.sort_values(by=['All'], axis=1, inplace=True, ascending=False)
+        pivot_table.sort_values(by=['All'], axis=1, ascending=False, inplace=True)
+
+        return pivot_table
+
+    # DONE
+    def get_daily_stats(self, *, date_from: str, date_to: str, status=ConversionStatus.confirmed.value):
+        pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
+        conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
+        data_table = self._create_data_table(conversion_list)
+        data_frame = self._create_data_frame(data_table)
+        pivot_table = self._create_pivot_table(data_frame, index='date', columns='goal_name', aggfunc='count',
+                                               values='goal_value', margins=True, fill_value=0)
+        pivot_table.sort_values(by=['All'], axis=0, ascending=False, inplace=True)
 
         return pivot_table
 
