@@ -23,7 +23,7 @@ class Offer:
         pivot_table.sort_values(by='All', ascending=False, inplace=True)
         return pivot_table
 
-    def get_daily_stats(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+    def get_partners_daily_stat(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         data_table = self._create_data_table(conversion_list)
@@ -34,21 +34,31 @@ class Offer:
 
         return pivot_table
 
-    def get_csv_reports(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+    def get_webmaster_daily_stats(self, date_from, date_to, status=ConversionStatus.confirmed.value):
+        pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
+        conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
+        data_table = self._create_data_table(conversion_list)
+        data_frame = self._create_data_frame(data_table)
+        pivot_table = self._create_pivot_table(data_frame, index=['date'], columns=['partner_name', 'sub3'], aggfunc='count',
+                                               values='goal_value', margins=True, fill_value=0)
+        pivot_table.sort_values(by=['All'], axis=1, inplace=True, ascending=False)
+
+        return pivot_table
+
+    def get_csv_reports(self, date_from: str, date_to: str, path: str, status=ConversionStatus.confirmed.value, ):
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         unique_partner_list = sorted(self._get_unique_partner_list(conversion_list))
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
 
-        path = 'reports/april/'
         # TODO: написать функцию генерации отчета
         for partner in unique_partner_list:
             unique_partner_report = data_frame[data_frame['partner_id'] == partner]
             unique_partner_report.reset_index(drop=True, inplace=True)
             unique_partner_report.to_csv(
-                path + str(str(f'{OfferId(self.offer_id).name}') + '_' + 'pid_' + f'{partner}') + '_' + str(
-                    f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
+                path + str(str(f'{OfferId(self.offer_id).name}') + '_' + 'pid_' + f'{partner}') + '_' +
+                str(f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(
