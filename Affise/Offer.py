@@ -156,3 +156,6 @@ class Offer:
             if partner_id not in unique_partner_list:
                 unique_partner_list.append(partner_id)
         return unique_partner_list
+
+
+print('sdfd')
