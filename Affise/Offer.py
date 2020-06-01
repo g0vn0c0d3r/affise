@@ -52,17 +52,15 @@ class Offer:
                     f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
 
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
-        response = requests.get(
-            self.__api_url + '3.0/stats/conversions',
-            headers={'API-Key': self.__api_key},
-            params=(
-                ('date_from', date_from),
-                ('date_to', date_to),
-                ('offer', self.offer_id),
-                ('status', status),
-                ('limit', limit),
-                ('page', page))
-        ).json()
+        response = requests.get(self.__api_url + '3.0/stats/conversions', headers={'API-Key': self.__api_key},
+                                params=(
+                                    ('date_from', date_from),
+                                    ('date_to', date_to),
+                                    ('offer', self.offer_id),
+                                    ('status', status),
+                                    ('limit', limit),
+                                    ('page', page)
+                                )).json()
         return response
 
     def _count_pages(self, date_from, date_to, status):
