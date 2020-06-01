@@ -34,6 +34,7 @@ class Offer:
 
         return pivot_table
 
+
     def get_csv_reports(self, date_from, date_to, status=ConversionStatus.confirmed.value):
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
