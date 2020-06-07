@@ -19,20 +19,20 @@ class Offer:
         conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
         data_table = self._create_data_table(conversion_list)
         data_frame = self._create_data_frame(data_table)
-        pivot_table = self._create_pivot_table(data_frame, index='partner_name', columns='goal_name',
-                                               values='goal_value', aggfunc='count', fill_value=0, margins=True)
-        pivot_table.sort_values(by=['All'], axis=0, ascending=False, inplace=True)
-        return pivot_table
 
+        conversions_pivot = self._create_pivot_table(data_frame,
+                                                     index='partner_name',
+                                                     columns='goal_name',
+                                                     values='goal_value',
+                                                     aggfunc='count',
+                                                     fill_value=0,
+                                                     margins=False)
 
+        cost = data_frame[['partner_name', 'goal_value']]
+        cost = cost.groupby('partner_name').sum()
+        conversions_pivot['Бюджет'] = [i for i in cost['goal_value']]
 
-
-
-
-
-
-
-
+        return conversions_pivot
 
 
 
