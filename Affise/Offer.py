@@ -34,8 +34,6 @@ class Offer:
 
         return conversions_pivot
 
-
-
     # DONE
     def get_partners_daily_stats(self, *, date_from: str, date_to: str, status=ConversionStatus.confirmed.value):
         pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)

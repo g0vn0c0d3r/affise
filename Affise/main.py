@@ -1,6 +1,20 @@
-import Affise.final
+from Affise.final import *
+
 
 lime_id = 7
-konga_id = 8
 
-lite = ge
+monthly_rep = get_aggregated_affiliate_stats(offer_id=lime_id, date_from='2020-06-01', date_to='2020-06-31')
+
+rep1 = monthly_rep[['raw_clicks', 'conversions', 'total_loans']].sort_values(by=['total_loans'], ascending=False)
+rep1['CR%'] = round((rep1['conversions'] / rep1['raw_clicks']) * 100, 1)
+rep1['AR%'] = round((rep1['total_loans'] / rep1['conversions']) * 100, 1)
+
+print(rep1)
+print()
+
+rep2 = monthly_rep[['Займ средний', 'Займ хороший', 'total_loans', 'cost']].sort_values(by='total_loans', ascending=False)
+print(rep2)
+
+print()
+print(monthly_rep.columns)
+
