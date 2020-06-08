@@ -25,21 +25,45 @@ def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: st
     pivot_table = pd.pivot_table(conv_data_frame, index='partner_name', columns='goal_name',
                                  aggfunc='count', values='goal_value', fill_value=0, margins=False)
 
+    # add 'total loans' column
+    pivot_table['loans'] = pivot_table['Займ средний'] + pivot_table['Займ хороший']
+
+    # add 'total conversions' column
+    pivot_table['conversions'] = clicks_data['conversions']
+
+    # add 'raw clicks' column
+    pivot_table['raw_clicks'] = clicks_data['raw_clicks']
+
+    # add 'uniq clicks' column
+    pivot_table['uniq_clicks'] = clicks_data['uniq_clicks']
+
+    # count cost for uniq partner
     cost = conv_data_frame[['partner_name', 'goal_value']]
     cost = cost.groupby(by=['partner_name']).sum()
 
+    # add 'cost' column
     pivot_table['cost'] = cost['goal_value']
-    pivot_table['conversions'] = clicks_data['conversions']
-    pivot_table['raw_clicks'] = clicks_data['raw_clicks']
-    pivot_table['uniq_clicks'] = clicks_data['uniq_clicks']
-    pivot_table['total_loans'] = pivot_table['Займ хороший'] + pivot_table['Займ средний']
 
+    # add 'total' row
+    pivot_table.loc['sum'] = pivot_table.sum()
+
+    # count & add 'CR%, AR%, CPA, EPC'
+
+    pivot_table['CR%'] = round(pivot_table['conversions'] / pivot_table['raw_clicks'] * 100, 1)
+    pivot_table['AR%'] = round(pivot_table['loans'] / pivot_table['conversions'] * 100, 1)
+    pivot_table['EPC'] = round(pivot_table['cost'] / pivot_table['raw_clicks'], 1)
+    pivot_table['CPL'] = round(pivot_table['cost'] / pivot_table['conversions'], 1)
+    pivot_table['CPA'] = round(pivot_table['cost'] / pivot_table['loans'], 1)
+
+    # rename column names
     pivot_table.rename(columns={
         'Займ средний': 'low',
         'Займ хороший': 'medium',
         'Займ отличный': 'high',
         'регистрация': 'regs',
     }, inplace=True)
+
+
 
     return pivot_table
 
