@@ -66,6 +66,21 @@ def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: st
     return pivot_table
 
 
+def get_partners_daily_stats(*, offer_id: int, date_from: str, date_to: str):
+    conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
+    conv_data_table = _create_conversion_data_table(conv_list)
+    conv_data_frame = _create_data_frame(data=conv_data_table,
+                                        columns=['partner_id', 'partner_name', 'goal_name', 'goal_value',
+                                                 'action_id', 'click_id', 'date', 'sub1', 'sub2', 'sub3'])
+    conv_data_frame = conv_data_frame[conv_data_frame['goal_name'] != 'регистрация']
+
+    pivot_table = pd.pivot_table(conv_data_frame, index='date', columns='partner_id',
+                                 aggfunc='count', values='goal_value', fill_value=0, margins=True)
+    pivot_table.sort_values(by=['All'], axis=1, ascending=False, inplace=True)
+
+    return pivot_table
+
+
 def _get_conversions_api_request(*, offer_id: int, date_from: str, date_to: str, limit=5000, page=1):
     response = requests.get(api_url + '3.0/stats/conversions', headers={'API-Key': api_key},
                             params=(
