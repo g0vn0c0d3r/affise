@@ -12,7 +12,8 @@ rep1['AR%'] = round((rep1['total_loans'] / rep1['conversions']) * 100, 1)
 print(rep1)
 print()
 
-rep2 = monthly_rep[['Займ средний', 'Займ хороший', 'total_loans', 'cost']].sort_values(by='total_loans', ascending=False)
+rep2 = monthly_rep[['low', 'medium', 'total_loans', 'cost']].sort_values(by='total_loans', ascending=False)
+rep2['cpa'] = round(rep2['cost'] / rep2['total_loans'])
 print(rep2)
 
 print()

@@ -35,6 +35,9 @@ def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: st
     pivot_table['total_loans'] = pivot_table['Займ хороший'] + pivot_table['Займ средний']
 
     pivot_table.rename(columns={
+        'Займ средний': 'low',
+        'Займ хороший': 'medium',
+        'Займ отличный': 'high',
         'регистрация': 'regs',
     }, inplace=True)
 
