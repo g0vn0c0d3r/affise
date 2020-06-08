@@ -63,8 +63,6 @@ def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: st
         'регистрация': 'regs',
     }, inplace=True)
 
-
-
     return pivot_table
 
 
