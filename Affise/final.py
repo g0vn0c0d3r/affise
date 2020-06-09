@@ -5,7 +5,7 @@ import pandas as pd
 api_url = 'https://api-lime-finance.affise.com/'
 api_key = '1ad6cf31c5fbcfb05cf7be2529d6d5cb'
 
-
+# DONE
 def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: str):
     conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
     conv_data_table = _create_conversion_data_table(conv_list)
@@ -65,7 +65,7 @@ def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: st
 
     return pivot_table
 
-
+# DONE
 def get_partners_daily_stats(*, offer_id: int, date_from: str, date_to: str):
     conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
     conv_data_table = _create_conversion_data_table(conv_list)
