@@ -18,3 +18,7 @@ print(rep1)
 print()
 print(rep2)
 print()
+
+
+wm_rep = get_webmasters_report(offer_id=lime_id, partner_id=30, date_from=date_from, date_to=date_to)
+print(wm_rep)
