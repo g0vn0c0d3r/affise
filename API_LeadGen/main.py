@@ -2,7 +2,7 @@ import requests
 import time
 
 
-file = open('LIME RU. Blocked 09.06.20.csv').readlines()
+file = open('LIME RU. Blocked 10.06.20.csv').readlines()
 TOKEN = 'zbT1YLJGsEngsYAwI6a5iyx7Bz3qcktPQSy38Sp47zjKfdlJMDlrxn5B34ZfGOiG'
 
 check_list = []
