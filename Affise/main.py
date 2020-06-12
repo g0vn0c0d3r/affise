@@ -27,9 +27,9 @@ leadssu = get_webmasters_report(offer_id=lime_id, partner_id=29, date_from=date_
 # guruleads.to_csv('guruleads.csv')
 # leadssu.to_csv('leadssu.csv')
 print(leadgid)
-print()
-print(leadssu)
-print()
-print(guruleads)
+# print()
+# print(leadssu)
+# print()
+# print(guruleads)
 
 
