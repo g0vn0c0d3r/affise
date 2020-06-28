@@ -5,8 +5,8 @@ lime_cpa = 7
 konga_cpa = 8
 lime_cpl = 15
 
-date_from = '2020-06-01'
-date_to = '2020-06-31'
+date_from = '2020-05-01'
+date_to = '2020-05-31'
 
 partners_report = get_partners_daily_stats(offer_id=lime_cpa, date_from=date_from, date_to=date_to)
 print(partners_report)
