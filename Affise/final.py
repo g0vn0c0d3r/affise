@@ -99,7 +99,7 @@ def get_overall_daily_report(*, offer_id: int, date_from: str, date_to: str):
     return fin
 
 
-def get_conversions_by_date_and_webmaster(*, offer_id: int, partner_id: int, date_from: str, date_to: str):
+def get_conversions_and_cost_by_webmaster(*, offer_id: int, partner_id: int, date_from: str, date_to: str):
     conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
     conv_data_table = _create_conversion_data_table(conv_list)
     conv_data_frame = _create_data_frame(data=conv_data_table,
@@ -115,6 +115,7 @@ def get_conversions_by_date_and_webmaster(*, offer_id: int, partner_id: int, dat
     fin.sort_values(by=['goal_name'], ascending=False, inplace=True)
 
     return fin
+
 
 def _get_conversions_api_request(*, offer_id: int, date_from: str, date_to: str, limit=5000, page=1):
     response = requests.get(api_url + '3.0/stats/conversions', headers={'API-Key': api_key},

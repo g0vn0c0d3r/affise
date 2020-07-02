@@ -21,9 +21,4 @@ rep2 = monthly_rep[['conversions', 'loans', 'cost', 'CPL', 'CPA', 'EPC']].sort_v
 print(rep1)
 print()
 print(rep2)
-rep2.to_csv('final.csv')
 print()
-
-#
-# res = get_conversions_by_date_and_webmaster(offer_id=lime_cpa, date_from=date_from, date_to=date_to, partner_id=20)
-# res.to_excel('liknot.csv')
