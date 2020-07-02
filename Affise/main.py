@@ -5,9 +5,12 @@ lime_cpa = 7
 konga_cpa = 8
 lime_cpl = 15
 
-date_from = '2020-05-01'
-date_to = '2020-05-31'
+date_from = '2020-06-01'
+date_to = '2020-06-30'
 
+rep = get_overall_daily_report(offer_id=lime_cpa, date_from=date_from, date_to=date_to)
+print(rep)
+print()
 partners_report = get_partners_daily_stats(offer_id=lime_cpa, date_from=date_from, date_to=date_to)
 print(partners_report)
 print()
@@ -18,4 +21,9 @@ rep2 = monthly_rep[['conversions', 'loans', 'cost', 'CPL', 'CPA', 'EPC']].sort_v
 print(rep1)
 print()
 print(rep2)
+rep2.to_csv('final.csv')
 print()
+
+#
+# res = get_conversions_by_date_and_webmaster(offer_id=lime_cpa, date_from=date_from, date_to=date_to, partner_id=20)
+# res.to_excel('liknot.csv')

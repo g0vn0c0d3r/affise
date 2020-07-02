@@ -73,6 +73,17 @@ class Offer:
                 path + str(str(f'{OfferId(self.offer_id).name}') + '_' + 'pid_' + f'{partner}') + '_' + str(
                     f'{date_from}') + '_' + str(f'{date_to}' + '.csv'))
 
+    def get_daily_table(self, *, date_from: str, date_to: str, status=ConversionStatus.confirmed.value):
+        pages = self._count_pages(date_from=date_from, date_to=date_to, status=status)
+        conversion_list = self._create_conversion_list(pages=pages, date_from=date_from, date_to=date_to, status=status)
+        data_table = self._create_data_table(conversion_list)
+        data_frame = self._create_data_frame(data_table)
+        pivot_table = self._create_pivot_table(data_frame, index='date', columns='goal_name', aggfunc='count',
+                                               values='goal_value', margins=True, fill_value=0)
+        pivot_table.sort_values(by=['All'], ascending=False, inplace=True)
+
+        return pivot_table
+
     def _api_conversions_request(self, date_from: str, date_to: str, status: int, limit=__page_limit, page=1):
         response = requests.get(self.__api_url + '3.0/stats/conversions', headers={'API-Key': self.__api_key},
                                 params=(
