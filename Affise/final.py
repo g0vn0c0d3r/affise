@@ -224,3 +224,12 @@ def _count_pages(*, api_response, limit):
 def _create_data_frame(*, data, columns):
     data_frame = pd.DataFrame(data=data, columns=columns)
     return data_frame
+
+
+def _get_unique_partner_list(conversion_list):
+    unique_partner_list = []
+    for conversion in conversion_list:
+        partner_id = conversion['partner']['id']
+        if partner_id not in unique_partner_list:
+            unique_partner_list.append(partner_id)
+    return unique_partner_list
