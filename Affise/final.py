@@ -68,7 +68,7 @@ def get_aggregated_affiliate_stats(*, offer_id: int, date_from: str, date_to: st
 
 
 # DONE
-def get_partners_daily_stats(*, offer_id: int, date_from: str, date_to: str):
+def get_daily_stats_by_affiliate(*, offer_id: int, date_from: str, date_to: str):
     conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
     conv_data_table = _create_conversion_data_table(conv_list)
     conv_data_frame = _create_data_frame(data=conv_data_table,
@@ -82,19 +82,27 @@ def get_partners_daily_stats(*, offer_id: int, date_from: str, date_to: str):
     return pivot_table
 
 
-def get_overall_daily_report(*, offer_id: int, date_from: str, date_to: str):
+# DONE
+def get_stats_by_day(*, offer_id: int, date_from: str, date_to: str):
     conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
     conv_data_table = _create_conversion_data_table(conv_list)
     conv_data_frame = _create_data_frame(data=conv_data_table,
                                         columns=['partner_id', 'partner_name', 'goal_name', 'goal_value',
                                                  'action_id', 'click_id', 'date', 'sub1', 'sub2', 'sub3'])
     conv_data_frame = conv_data_frame[conv_data_frame['goal_name'] != 'регистрация']
+    clicks_list = _create_clicks_list(offer_id=offer_id, date_from=date_from, date_to=date_to,
+                                     slice=['year', 'month', 'day', 'affiliate'])
+    clicks_data_table = _create_clicks_data_table(clicks_list)
+    clicks_data_frame = _create_data_frame(data=clicks_data_table,
+                                          columns=['date', 'affiliate', 'raw_clicks', 'uniq_clicks', 'conversions'])
+    clicks = clicks_data_frame.groupby(by='date')['raw_clicks'].sum()
 
     budget = conv_data_frame.groupby(by='date')['goal_value'].sum()
     loans = conv_data_frame.groupby(by='date')['goal_name'].count()
 
-    fin = pd.concat([budget, loans], axis=1)
+    fin = pd.concat([budget, loans, clicks], axis=1)
     fin['CPA'] = round(fin['goal_value'] / fin['goal_name'], 0)
+    fin['EPC'] = round(fin['goal_value'] / fin['raw_clicks'], 2)
 
     return fin
 
@@ -115,6 +123,23 @@ def get_conversions_and_cost_by_webmaster(*, offer_id: int, partner_id: int, dat
     fin.sort_values(by=['goal_name'], ascending=False, inplace=True)
 
     return fin
+
+
+def get_daily_stats_by_webmaster(*, offer_id: int, partner_id: int, date_from: str, date_to: str):
+    conv_list = _create_conversion_list(offer_id=offer_id, date_from=date_from, date_to=date_to)
+    conv_data_table = _create_conversion_data_table(conv_list)
+    conv_data_frame = _create_data_frame(data=conv_data_table,
+                                        columns=['partner_id', 'partner_name', 'goal_name', 'goal_value',
+                                                 'action_id', 'click_id', 'date', 'sub1', 'sub2', 'sub3'])
+    conv_data_frame = conv_data_frame[conv_data_frame['goal_name'] != 'регистрация']
+
+    final_data_frame = conv_data_frame[conv_data_frame['partner_id'] == partner_id]
+
+    pivot_table = pd.pivot_table(final_data_frame, index='date', columns='sub3',
+                                 aggfunc='count', values='goal_value', fill_value=0, margins=True)
+    pivot_table.sort_values(by=['All'], axis=1, ascending=False, inplace=True)
+
+    return pivot_table
 
 
 def _get_conversions_api_request(*, offer_id: int, date_from: str, date_to: str, limit=5000, page=1):
