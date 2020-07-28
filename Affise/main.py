@@ -11,14 +11,14 @@ date_to = '2020-07-31'
 # konga = Offer(offer_id=konga_cpa)
 # konga.get_csv_reports(date_from=date_from, date_to=date_to, path='june/')
 
-rep = get_stats_by_day(offer_id=konga_cpa, date_from=date_from, date_to=date_to)
+rep = get_stats_by_day(offer_id=lime_cpa, date_from=date_from, date_to=date_to)
 print(rep)
 print()
-partners_report = get_daily_stats_by_affiliate(offer_id=konga_cpa, date_from=date_from, date_to=date_to)
+partners_report = get_daily_stats_by_affiliate(offer_id=lime_cpa, date_from=date_from, date_to=date_to)
 print(partners_report)
 print()
 
-monthly_rep = get_aggregated_affiliate_stats(offer_id=konga_cpa, date_from=date_from, date_to=date_to)
+monthly_rep = get_aggregated_affiliate_stats(offer_id=lime_cpa, date_from=date_from, date_to=date_to)
 rep1 = monthly_rep[['raw_clicks', 'conversions', 'loans', 'CR%', 'AR%']].sort_values(by='loans', ascending=False)
 rep2 = monthly_rep[['conversions', 'loans', 'cost', 'CPL', 'CPA', 'EPC']].sort_values(by='loans', ascending=False)
 print(rep1)
