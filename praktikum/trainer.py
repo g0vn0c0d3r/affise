@@ -59,8 +59,22 @@ data['living_share'] = round(data['living_area'] / data['total_area'], 2)
 # kitchen_share = отношение жилой площади к общей
 data['kitchen_share'] = round(data['kitchen_area'] / data['total_area'], 2)
 
-data['weekday'] = pd.DatetimeIndex(data['first_day_exposition']).day_name()
+# добавляем название и индекс дня недели
+data['weekday_name'] = pd.DatetimeIndex(data['first_day_exposition']).day_name()
 data['weekday_index'] = pd.DatetimeIndex(data['first_day_exposition']).weekday
+
+# добавляем название и индекс месяца
+data['month_name'] = pd.DatetimeIndex(data['first_day_exposition']).month_name()
+data['month_index'] = pd.DatetimeIndex(data['first_day_exposition']).month
+
+# добавляем год
+data['year'] = pd.DatetimeIndex(data['first_day_exposition']).year
+
+
+
+
+
+
 
 
 data.to_csv('data.csv')
