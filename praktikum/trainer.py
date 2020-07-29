@@ -41,7 +41,29 @@ for locality in data['locality_name'].unique():
 
 data['days_exposition'].fillna(data['days_exposition'].median(), inplace=True)
 
-print(data.isna().sum())
+# изменяем типы данных и округляем значения в 2 столбцах
+for col in ['last_price', 'cityCenters_nearest', 'days_exposition']:
+    data[col] = data[col].astype(int)
 
+for col in ['living_area', 'kitchen_area']:
+    data[col] = data[col].round(decimals=2)
+
+data['first_day_exposition'] = pd.to_datetime(data['first_day_exposition'], format='%Y.%m.%d')
+
+# ppsm = price per square meter
+data['ppsm'] = round(data['last_price'] / data['total_area'], 0)
+
+# living_share = отношение жилой площади к общей
+data['living_share'] = round(data['living_area'] / data['total_area'], 2)
+
+# kitchen_share = отношение жилой площади к общей
+data['kitchen_share'] = round(data['kitchen_area'] / data['total_area'], 2)
+
+data['weekday'] = pd.DatetimeIndex(data['first_day_exposition']).day_name()
+data['weekday_index'] = pd.DatetimeIndex(data['first_day_exposition']).weekday
+
+
+data.to_csv('data.csv')
+print(data.info())
 
 
