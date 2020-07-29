@@ -39,6 +39,8 @@ for locality in data['locality_name'].unique():
         median = data['cityCenters_nearest'].median()
         data.loc[(data['locality_name'] == locality) & (data['cityCenters_nearest'].isnull()), 'cityCenters_nearest'] = median
 
+data['days_exposition'].fillna(data['days_exposition'].median(), inplace=True)
+
 print(data.isna().sum())
 
 
