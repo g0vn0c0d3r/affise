@@ -71,10 +71,20 @@ data['month_index'] = pd.DatetimeIndex(data['first_day_exposition']).month
 data['year'] = pd.DatetimeIndex(data['first_day_exposition']).year
 
 
+# категоризируем этажность
+def get_floor_category(table):
+    floors_total = table['floors_total']
+    floor = table['floor']
+
+    if floors_total == floor:
+        return 'последний'
+    elif floor == 1:
+        return 'первый'
+    else:
+        return 'другой'
 
 
-
-
+data['floor_category'] = data.apply(get_floor_category, axis=1)
 
 
 data.to_csv('data.csv')
