@@ -98,8 +98,10 @@ data = data.query('2.4 < ceiling_height < 3.5').reset_index(drop=True)
 # удаляем неадекватную стоимость квадратного метра
 data = data.query('50000 < ppsm < 200000').reset_index(drop=True)
 
+# print(data.info())
 
-
+price_corr = data[['last_price', 'total_area', 'rooms', 'cityCenters_nearest', 'floor_category']]
+print(price_corr)
 
 
 
