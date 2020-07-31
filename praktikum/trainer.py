@@ -86,8 +86,43 @@ def get_floor_category(table):
 
 data['floor_category'] = data.apply(get_floor_category, axis=1)
 
+# отфильтруем редкие значения и выбросы
+data = data.query('30 < total_area < 150').reset_index(drop=True)
 
-data.to_csv('data.csv')
-print(data.info())
+# удаляем редкие этажи
+data = data.query('0 < rooms < 6').reset_index(drop=True)
+
+# удаляем редкие этажи
+data = data.query('2.4 < ceiling_height < 3.5').reset_index(drop=True)
+
+# удаляем неадекватную стоимость квадратного метра
+data = data.query('50000 < ppsm < 200000').reset_index(drop=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
