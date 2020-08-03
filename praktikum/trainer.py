@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 raw_data = pd.read_csv('real_estate_data.csv', sep='\t')
 data = raw_data
+print(raw_data)
 
 # пустые значения в ceiling_height заполняем медианой всего столбца
 data['ceiling_height'].fillna(value=data['ceiling_height'].median(), inplace=True)
@@ -100,14 +101,19 @@ data = data.query('50000 < ppsm < 200000').reset_index(drop=True)
 
 # print(data.info())
 
-price_corr = data[['last_price', 'total_area', 'rooms', 'cityCenters_nearest', 'floor_category']]
-print(price_corr)
+# top10 = data['locality_name'].value_counts()[:10].index.tolist()
 
+top10 = data.groupby(by='locality_name', as_index=False).agg({'ppsm': 'count', 'last_price': 'sum', 'total_area': 'sum'}).sort_values(by='ppsm', ascending=False)[:10].reset_index(drop=True)
+top10.rename(columns={'ppsm': 'num_ads'}, inplace=True)
 
-
-
-
-
+# print(top10)
+# print()
+#
+# mur = raw_data.query('locality_name == "посёлок Шушары"')
+# print(mur['cityCenters_nearest'].describe())
+# print()
+# spb = raw_data.query('locality_name == "Санкт-Петербург"')
+# print(spb['cityCenters_nearest'].describe())
 
 
 
