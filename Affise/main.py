@@ -1,15 +1,15 @@
 from Affise.final import *
 from Affise.Offer import *
 
-lime_cpa = 7
-konga_cpa = 8
+lime_cpa = 16
+konga_cpa = 17
 lime_cpl = 15
 
 lime = Offer(offer_id=lime_cpa)
 konga = Offer(offer_id=konga_cpa)
 
-date_from = '2020-08-01'
-date_to = '2020-08-31'
+date_from = '2021-03-01'
+date_to = '2021-03-31'
 
 # konga = Offer(offer_id=konga_cpa)
 # konga.get_csv_reports(date_from=date_from, date_to=date_to, path='reports/konga/july/')
