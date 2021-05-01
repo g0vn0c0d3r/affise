@@ -1,5 +1,5 @@
 from affise_manual_scripts.final import *
-from affise_custom_reports.Offer import *
+from affise_custom_reports.old.Offer import *
 
 lime_cpa = 16
 konga_cpa = 17

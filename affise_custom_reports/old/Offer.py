@@ -1,6 +1,6 @@
 import requests
-from affise_custom_reports.Constants import ConversionStatus
-from affise_custom_reports.Constants import OfferId
+from affise_custom_reports.old.Constants import ConversionStatus
+from affise_custom_reports.old.Constants import OfferId
 import pandas as pd
 
 
