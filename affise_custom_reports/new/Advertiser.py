@@ -9,7 +9,7 @@ class Advertiser:
         self.id = id
 
     def single_api_conversions_request(self, date_from: str, date_to: str, limit=1, page=1):
-
+        # TODO: подставлять URL отчета из конфига
         response = requests.get(Config.Credentials.API_URL.value + '3.0/stats/conversions',
                                 headers={'API-Key': Config.Credentials.API_KEY.value},
                                 params=(
@@ -22,7 +22,8 @@ class Advertiser:
         return response
 
     def create_conversions_list(self, date_from: str, date_to: str):
-        pages = self.single_api_conversions_request(date_from=date_from, date_to=date_to)['pagination']['total_count'] // \
+        pages = self.single_api_conversions_request(date_from=date_from, date_to=date_to)['pagination'][
+                    'total_count'] // \
                 Config.Credentials.LIMIT.value + 1
 
         conversion_list = []
@@ -34,4 +35,3 @@ class Advertiser:
 
             conversion_list.extend(conversions)
         return conversion_list, len(conversion_list)
-
