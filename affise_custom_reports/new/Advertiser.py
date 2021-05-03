@@ -1,33 +1,37 @@
 import requests
 import pandas as pd
-from enum import Enum
-
-
-class AdvId(Enum):
-    LIME = '5a558391c3ebae42008b4567'
-    KONGA = '5a558967c3ebae43008b4567'
-
-
-class ConversionStatus(Enum):
-    CONFIRMED = 1
-    PENDING = 2
-    DECLINED = 3
-    NOT_FOUND = 4
-    HOLD = 5
-    ALL = [CONFIRMED, PENDING, DECLINED, NOT_FOUND, HOLD]
-
-
-class ApiHeaders(Enum):
-    API_URL = 'https://api-lime-finance.affise.com/'
-    API_KEY = '0a3994e5f04ed3d755cba60eb50de7c6'
-    LIMIT = 2000
+import Config
 
 
 class Advertiser:
 
-    def __init__(self, adv_id):
-        self.adv_id = adv_id
+    def __init__(self, id):
+        self.id = id
 
-    def single_api_request(self, date_from: str, date_to: str, status: list, advertiser: int, page: int, limit: int):
-        response = requests.get(ApiHeaders.API_URL + '3.0/stats/conversions', headers={'API-Key': ApiHeaders.API_KEY},
-                                params=('date_from': ))
+    def single_api_conversions_request(self, date_from: str, date_to: str, limit=1, page=1):
+
+        response = requests.get(Config.Credentials.API_URL.value + '3.0/stats/conversions',
+                                headers={'API-Key': Config.Credentials.API_KEY.value},
+                                params=(
+                                    ('date_from', date_from),
+                                    ('date_to', date_to),
+                                    ('advertiser', self.id),
+                                    ('limit', limit),
+                                    ('page', page)
+                                )).json()
+        return response
+
+    def create_conversions_list(self, date_from: str, date_to: str):
+        pages = self.single_api_conversions_request(date_from=date_from, date_to=date_to)['pagination']['total_count'] // \
+                Config.Credentials.LIMIT.value + 1
+
+        conversion_list = []
+        for page in range(pages):
+            conversions = self.single_api_conversions_request(date_from=date_from,
+                                                              date_to=date_to,
+                                                              page=page + 1,
+                                                              limit=Config.Credentials.LIMIT.value)['conversions']
+
+            conversion_list.extend(conversions)
+        return conversion_list, len(conversion_list)
+
