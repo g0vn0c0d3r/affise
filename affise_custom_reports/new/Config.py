@@ -13,3 +13,8 @@ class ConversionStatus(Enum):
     DECLINED = 3
     HOLD = 5
     ALL = [1, 2, 3]
+
+
+class ReportType(Enum):
+    CONVERSIONS = '3.0/stats/conversions'
+    CLICKS = '3.0/stats/clicks'

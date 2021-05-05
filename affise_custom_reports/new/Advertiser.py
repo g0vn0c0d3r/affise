@@ -10,7 +10,7 @@ class Advertiser:
 
     def single_api_conversions_request(self, date_from: str, date_to: str, limit=1, page=1):
         # TODO: подставлять URL отчета из конфига
-        response = requests.get(Config.Credentials.API_URL.value + '3.0/stats/conversions',
+        response = requests.get(Config.Credentials.API_URL.value + Config.ReportType.CONVERSIONS.value,
                                 headers={'API-Key': Config.Credentials.API_KEY.value},
                                 params=(
                                     ('date_from', date_from),
@@ -34,4 +34,4 @@ class Advertiser:
                                                               limit=Config.Credentials.LIMIT.value)['conversions']
 
             conversion_list.extend(conversions)
-        return conversion_list, len(conversion_list)
+        return conversion_list
