@@ -12,7 +12,7 @@ class Advertiser:
 
         if rep_type == 'conversions':
             report_type = Config.ReportType.CONVERSIONS.value
-        elif rep_type == 'clicks':
+        else:
             report_type = Config.ReportType.CLICKS.value
 
         response = requests.get(Config.Credentials.API_URL.value + report_type,
@@ -38,6 +38,6 @@ class Advertiser:
                                                   rep_type='conversions',
                                                   page=page + 1,
                                                   limit=Config.Credentials.LIMIT.value)['conversions']
-
             conversion_list.extend(conversions)
+
         return conversion_list
