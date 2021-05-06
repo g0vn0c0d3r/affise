@@ -12,4 +12,4 @@ end_date = str(datetime.date.today())
 
 lime = lime.create_conversions_list(date_from=start_date, date_to=end_date)
 
-print(lime[0])
+print(lime)
