@@ -12,4 +12,4 @@ end_date = str(datetime.date.today())
 
 lime = lime.daily_stats(date_from=start_date, date_to=end_date)
 
-print(lime.head())
+lime.sample(10).to_csv('TEST.csv')

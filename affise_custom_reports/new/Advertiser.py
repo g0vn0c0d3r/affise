@@ -5,14 +5,27 @@ import Config
 
 def create_data_frame(input_data: list):
     conversion_list = []
-    columns = ['ts', 'action_id', 'status']
+    columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
+               'partner', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6']
 
     for item in input_data:
-        ts = item['created_at']
+        date = item['created_at'].split(' ')[0]
         action_id = item['action_id']
+        click_id = item['clickid']
         status = item['status']
+        offer_id = item['offer_id']
+        goal = item['goal']
+        payouts = item['payouts']
+        partner = item['partner']['name']
+        sub1 = item['sub1']
+        sub2 = item['sub2']
+        sub3 = item['sub3']
+        sub4 = item['sub4']
+        sub5 = item['sub5']
+        sub6 = item['sub6']
 
-        conversion_list.append([ts, action_id, status])
+        conversion_list.append([date, action_id, click_id, status, offer_id, goal, payouts,
+                                partner, sub1, sub2, sub3, sub4, sub5, sub6])
 
     data_frame = pd.DataFrame(data=conversion_list, columns=columns)
 
