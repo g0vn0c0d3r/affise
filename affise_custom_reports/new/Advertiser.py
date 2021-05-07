@@ -5,12 +5,14 @@ import Config
 
 def create_data_frame(input_data: list):
     conversion_list = []
-    columns = ['ts']
+    columns = ['ts', 'action_id', 'status']
 
     for item in input_data:
         ts = item['created_at']
+        action_id = item['action_id']
+        status = item['status']
 
-        conversion_list.append([ts])
+        conversion_list.append([ts, action_id, status])
 
     data_frame = pd.DataFrame(data=conversion_list, columns=columns)
 
@@ -52,6 +54,7 @@ class Advertiser:
 
         return conversion_list
 
+    #TODO: Дописать метод группировки
     def daily_stats(self, date_from: str, date_to: str):
         pages = self.api_single_request(date_from=date_from,
                                         date_to=date_to,
@@ -59,6 +62,7 @@ class Advertiser:
                     'total_count'] // Config.Credentials.LIMIT.value + 1
 
         conversion_list = self.create_conversions_list(date_from=date_from, date_to=date_to, pages=pages)
+
         data_frame = create_data_frame(input_data=conversion_list)
 
         return data_frame
