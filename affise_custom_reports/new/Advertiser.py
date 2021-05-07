@@ -3,10 +3,24 @@ import pandas as pd
 import Config
 
 
+def create_data_frame(input_data: list):
+    conversion_list = []
+    columns = ['ts']
+
+    for item in input_data:
+        ts = item['created_at']
+
+        conversion_list.append([ts])
+
+    data_frame = pd.DataFrame(data=conversion_list, columns=columns)
+
+    return data_frame
+
+
 class Advertiser:
 
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, adv_id):
+        self.adv_id = adv_id
 
     def api_single_request(self, date_from: str, date_to: str, rep_type: str, limit=1, page=1):
 
@@ -20,17 +34,13 @@ class Advertiser:
                                 params=(
                                     ('date_from', date_from),
                                     ('date_to', date_to),
-                                    ('advertiser', self.id),
+                                    ('advertiser', self.adv_id),
                                     ('limit', limit),
                                     ('page', page)
                                 )).json()
         return response
 
-    def create_conversions_list(self, date_from: str, date_to: str):
-        pages = self.api_single_request(date_from=date_from,
-                                        date_to=date_to,
-                                        rep_type='conversions')['pagination']['total_count'] // Config.Credentials.LIMIT.value + 1
-
+    def create_conversions_list(self, date_from: str, date_to: str, pages: int):
         conversion_list = []
         for page in range(pages):
             conversions = self.api_single_request(date_from=date_from,
@@ -41,3 +51,14 @@ class Advertiser:
             conversion_list.extend(conversions)
 
         return conversion_list
+
+    def daily_stats(self, date_from: str, date_to: str):
+        pages = self.api_single_request(date_from=date_from,
+                                        date_to=date_to,
+                                        rep_type='conversions')['pagination'][
+                    'total_count'] // Config.Credentials.LIMIT.value + 1
+
+        conversion_list = self.create_conversions_list(date_from=date_from, date_to=date_to, pages=pages)
+        data_frame = create_data_frame(input_data=conversion_list)
+
+        return data_frame
