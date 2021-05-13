@@ -3,6 +3,7 @@ import pandas as pd
 import Config
 
 
+# TODO: Сделать категоризацию
 def create_data_frame(input_data: list):
     conversion_list = []
     columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
@@ -67,7 +68,7 @@ class Advertiser:
 
         return conversion_list
 
-    #TODO: Дописать метод группировки
+    # TODO: Дописать метод группировки
     def daily_stats(self, date_from: str, date_to: str):
         pages = self.api_single_request(date_from=date_from,
                                         date_to=date_to,
