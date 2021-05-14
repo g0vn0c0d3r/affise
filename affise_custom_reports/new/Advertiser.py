@@ -3,7 +3,6 @@ import pandas as pd
 import Config
 
 
-# TODO: Сделать категоризацию
 def create_data_frame(input_data: list):
     conversion_list = []
     columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
@@ -30,7 +29,39 @@ def create_data_frame(input_data: list):
 
     data_frame = pd.DataFrame(data=conversion_list, columns=columns)
 
+    # приведем столбец date в нужный тип данных
+    data_frame['date'] = data_frame['date'].astype('datetime64[D]')
+
+    # выделяем из date новые столбцы: weekday, month, year
+    data_frame['weekday'] = data_frame['date'].dt.day_name()
+    data_frame['week'] = data_frame['date'].dt.isocalendar().week
+    data_frame['month'] = data_frame['date'].dt.month
+    data_frame['year'] = data_frame['date'].dt.year
+
+    # переименовываем название целей в столбце goal
+    data_frame['goal'].replace({
+        'регистрация': 'registration',
+        'Займ средний': 'low_score_client',
+        'Займ хороший': 'med_score_client',
+        'Займ отличный': 'high_score_client',
+        'Повторный займ': 'repeated_loan'
+    }, inplace=True)
+
+    # категоризайия займов
+    data_frame['loan_category'] = data_frame.apply(goal_categorization, axis=1)
+
     return data_frame
+
+
+def goal_categorization(row):
+    goal = row['goal']
+
+    if goal == 'registration':
+        return 'reg'
+    elif goal == 'repeated_loan':
+        return 'old'
+    else:
+        return 'new'
 
 
 class Advertiser:
@@ -68,8 +99,7 @@ class Advertiser:
 
         return conversion_list
 
-    # TODO: Дописать метод группировки
-    def daily_stats(self, date_from: str, date_to: str):
+    def conversions_by_partners_and_time(self, date_from: str, date_to: str, index: str):
         pages = self.api_single_request(date_from=date_from,
                                         date_to=date_to,
                                         rep_type='conversions')['pagination'][
@@ -79,4 +109,6 @@ class Advertiser:
 
         data_frame = create_data_frame(input_data=conversion_list)
 
-        return data_frame
+        pivoted_data = data_frame.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')
+
+        return pivoted_data
