@@ -99,7 +99,7 @@ class Advertiser:
 
         return conversion_list
 
-    def conversions_by_partners_and_time(self, date_from: str, date_to: str, index: str):
+    def general_stats(self, date_from: str, date_to: str, index: str):
         pages = self.api_single_request(date_from=date_from,
                                         date_to=date_to,
                                         rep_type='conversions')['pagination'][
@@ -109,6 +109,12 @@ class Advertiser:
 
         data_frame = create_data_frame(input_data=conversion_list)
 
-        pivoted_data = data_frame.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')
+        pivoted_conversions = data_frame.pivot_table(index=index, columns='loan_category',
+                                                     values='goal', aggfunc='count').reindex(['reg', 'new', 'old'], axis=1)
 
-        return pivoted_data
+        pivoted_conversions['all'] = pivoted_conversions['new'] + pivoted_conversions['old']
+        pivoted_conversions['ARn%'] = ((pivoted_conversions['new'] / pivoted_conversions['reg'])*100).round(2)
+        pivoted_conversions['ARo%'] = ((pivoted_conversions['old'] / pivoted_conversions['reg'])*100).round(2)
+        pivoted_conversions['RLS%'] = ((pivoted_conversions['old'] / pivoted_conversions['all'])*100).round(2)
+
+        return pivoted_conversions
