@@ -109,8 +109,8 @@ class Advertiser:
 
         data_frame = create_data_frame(input_data=conversion_list)
 
-        pivoted_conversions = data_frame.pivot_table(index=index, columns='loan_category',
-                                                     values='goal', aggfunc='count').reindex(['reg', 'new', 'old'], axis=1)
+        pivoted_conversions = data_frame.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')\
+            .reindex(['reg', 'new', 'old'], axis=1)
 
         pivoted_conversions['all'] = pivoted_conversions['new'] + pivoted_conversions['old']
         pivoted_conversions['ARn%'] = ((pivoted_conversions['new'] / pivoted_conversions['reg'])*100).round(2)
