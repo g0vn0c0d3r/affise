@@ -101,5 +101,19 @@ class Advertiser:
 
         pivoted_conversions = data_frame.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')\
             .reindex(['reg', 'new', 'old'], axis=1)
+        pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['old']
+        pivoted_conversions['ARn%'] = ((pivoted_conversions['new'] / pivoted_conversions['reg'])*100).round(0)
+        pivoted_conversions['ARo%'] = ((pivoted_conversions['old'] / pivoted_conversions['reg'])*100).round(0)
+        pivoted_conversions['RLS%'] = ((pivoted_conversions['old'] / pivoted_conversions['total'])*100).round(0)
 
-        return pivoted_conversions
+        pivoted_budget = data_frame.pivot_table(index=index, columns='loan_category', values='payouts', aggfunc='sum')
+        pivoted_budget.drop(columns='reg', inplace=True)
+        pivoted_budget.rename(columns={'new': 'costs_new', 'old': 'costs_old'}, inplace=True)
+        pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_old']
+
+        merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index)
+        merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype('int')
+        merged_data['CPAo'] = (merged_data['costs_old'] / merged_data['old']).astype('int')
+        merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype('int')
+
+        return merged_data
