@@ -69,14 +69,8 @@ class Advertiser:
     def __init__(self, adv_id):
         self.adv_id = adv_id
 
-    def api_single_request(self, date_from: str, date_to: str, rep_type: str, limit=1, page=1):
-
-        if rep_type == 'conversions':
-            report_type = Config.ReportType.CONVERSIONS.value
-        else:
-            report_type = Config.ReportType.CLICKS.value
-
-        response = requests.get(Config.Credentials.API_URL.value + report_type,
+    def api_conversions_single_request(self, date_from: str, date_to: str, limit=1, page=1):
+        response = requests.get(Config.Credentials.API_URL.value + Config.ReportType.CONVERSIONS.value,
                                 headers={'API-Key': Config.Credentials.API_KEY.value},
                                 params=(
                                     ('date_from', date_from),
@@ -90,20 +84,16 @@ class Advertiser:
     def create_conversions_list(self, date_from: str, date_to: str, pages: int):
         conversion_list = []
         for page in range(pages):
-            conversions = self.api_single_request(date_from=date_from,
-                                                  date_to=date_to,
-                                                  rep_type='conversions',
-                                                  page=page + 1,
-                                                  limit=Config.Credentials.LIMIT.value)['conversions']
+            conversions = self.api_conversions_single_request(date_from=date_from,
+                                                              date_to=date_to,
+                                                              page=page + 1,
+                                                              limit=Config.Credentials.LIMIT.value)['conversions']
             conversion_list.extend(conversions)
 
         return conversion_list
 
     def general_stats(self, date_from: str, date_to: str, index: str):
-        pages = self.api_single_request(date_from=date_from,
-                                        date_to=date_to,
-                                        rep_type='conversions')['pagination'][
-                    'total_count'] // Config.Credentials.LIMIT.value + 1
+        pages = self.api_conversions_single_request(date_from=date_from, date_to=date_to)['pagination']['total_count'] // Config.Credentials.LIMIT.value + 1
 
         conversion_list = self.create_conversions_list(date_from=date_from, date_to=date_to, pages=pages)
 
@@ -111,10 +101,5 @@ class Advertiser:
 
         pivoted_conversions = data_frame.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')\
             .reindex(['reg', 'new', 'old'], axis=1)
-
-        pivoted_conversions['all'] = pivoted_conversions['new'] + pivoted_conversions['old']
-        pivoted_conversions['ARn%'] = ((pivoted_conversions['new'] / pivoted_conversions['reg'])*100).round(2)
-        pivoted_conversions['ARo%'] = ((pivoted_conversions['old'] / pivoted_conversions['reg'])*100).round(2)
-        pivoted_conversions['RLS%'] = ((pivoted_conversions['old'] / pivoted_conversions['all'])*100).round(2)
 
         return pivoted_conversions
