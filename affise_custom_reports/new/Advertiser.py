@@ -134,4 +134,7 @@ class Advertiser:
         merged_data['CPAo'] = (merged_data['costs_old'] / merged_data['old']).astype('int')
         merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype('int')
 
+        # Считаем показатель CPL - cost per lead (registration)
+        merged_data['CPL'] = (merged_data['costs_total'] / merged_data['reg']).astype('int')
+
         return merged_data
