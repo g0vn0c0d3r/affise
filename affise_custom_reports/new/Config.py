@@ -18,3 +18,10 @@ class ConversionStatus(Enum):
 class ReportType(Enum):
     CONVERSIONS = '3.0/stats/conversions'
     CLICKS = '3.0/stats/clicks'
+
+
+class PartnerID(Enum):
+    LeadsTech = 3
+    Leadgid = 30
+    LeadsSU = 29
+    Guruleads = 34
