@@ -6,7 +6,7 @@ import Config
 def create_data_frame(input_data: list):
     conversion_list = []
     columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
-               'partner', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6']
+               'partner', 'partner_id', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6']
 
     for item in input_data:
         date = item['created_at'].split(' ')[0]
@@ -17,6 +17,7 @@ def create_data_frame(input_data: list):
         goal = item['goal']
         payouts = item['payouts']
         partner = item['partner']['name']
+        partner_id = item['partner']['id']
         sub1 = item['sub1']
         sub2 = item['sub2']
         sub3 = item['sub3']
@@ -25,7 +26,7 @@ def create_data_frame(input_data: list):
         sub6 = item['sub6']
 
         conversion_list.append([date, action_id, click_id, status, offer_id, goal, payouts,
-                                partner, sub1, sub2, sub3, sub4, sub5, sub6])
+                                partner, partner_id, sub1, sub2, sub3, sub4, sub5, sub6])
 
     data_frame = pd.DataFrame(data=conversion_list, columns=columns)
 
@@ -148,37 +149,37 @@ class Advertiser:
 
         # Из списка конверсий собираем data frame
         data_frame = create_data_frame(input_data=conversion_list)
-        data_frame = data_frame[data_frame['partner'] == partner_id]
+        # data_frame = data_frame[data_frame['partner'] == partner_id]
+        #
+        # # Генерируем сводную таблицу с конверсиями и группировкой по groupby
+        # pivoted_conversions = data_frame.pivot_table(index=groupby, columns='loan_category', values='goal',
+        #                                              aggfunc='count').reindex(['reg', 'new', 'old'], axis=1)
+        #
+        # # Добавляем расчитываемые параметры
+        # pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['old']
+        # pivoted_conversions['ARn%'] = (pivoted_conversions['new'] / pivoted_conversions['reg']).round(2)
+        # pivoted_conversions['ARo%'] = (pivoted_conversions['old'] / pivoted_conversions['reg']).round(2)
+        # pivoted_conversions['RLS%'] = (pivoted_conversions['old'] / pivoted_conversions['total']).round(2)
+        #
+        # # Генерируем сводную таблицу с бюджетами по разным типам займов и группировкой по groupby
+        # pivoted_budget = data_frame.pivot_table(index=groupby, columns='loan_category', values='payouts', aggfunc='sum')
+        #
+        # # Удаляем столбец 'reg'
+        # pivoted_budget.drop(columns='reg', inplace=True)
+        #
+        # # Переименовываем часть столбцов
+        # pivoted_budget.rename(columns={'new': 'costs_new', 'old': 'costs_old'}, inplace=True)
+        #
+        # # Считаем общий бюджет по всем типам займов
+        # pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_old']
+        #
+        # # Объединяем сводные таблицы с конверсиями и бюджетом
+        # merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=groupby)
+        #
+        # # Добавялем расчитываемые показатели
+        # merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype('int')
+        # merged_data['CPAo'] = (merged_data['costs_old'] / merged_data['old']).astype('int')
+        # merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype('int')
+        # merged_data['CPL'] = (merged_data['costs_total'] / merged_data['reg']).astype('int')
 
-        # Генерируем сводную таблицу с конверсиями и группировкой по groupby
-        pivoted_conversions = data_frame.pivot_table(index=groupby, columns='loan_category', values='goal',
-                                                     aggfunc='count').reindex(['reg', 'new', 'old'], axis=1)
-
-        # Добавляем расчитываемые параметры
-        pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['old']
-        pivoted_conversions['ARn%'] = (pivoted_conversions['new'] / pivoted_conversions['reg']).round(2)
-        pivoted_conversions['ARo%'] = (pivoted_conversions['old'] / pivoted_conversions['reg']).round(2)
-        pivoted_conversions['RLS%'] = (pivoted_conversions['old'] / pivoted_conversions['total']).round(2)
-
-        # Генерируем сводную таблицу с бюджетами по разным типам займов и группировкой по groupby
-        pivoted_budget = data_frame.pivot_table(index=groupby, columns='loan_category', values='payouts', aggfunc='sum')
-
-        # Удаляем столбец 'reg'
-        pivoted_budget.drop(columns='reg', inplace=True)
-
-        # Переименовываем часть столбцов
-        pivoted_budget.rename(columns={'new': 'costs_new', 'old': 'costs_old'}, inplace=True)
-
-        # Считаем общий бюджет по всем типам займов
-        pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_old']
-
-        # Объединяем сводные таблицы с конверсиями и бюджетом
-        merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=groupby)
-
-        # Добавялем расчитываемые показатели
-        merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype('int')
-        merged_data['CPAo'] = (merged_data['costs_old'] / merged_data['old']).astype('int')
-        merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype('int')
-        merged_data['CPL'] = (merged_data['costs_total'] / merged_data['reg']).astype('int')
-
-        return merged_data
+        return data_frame
