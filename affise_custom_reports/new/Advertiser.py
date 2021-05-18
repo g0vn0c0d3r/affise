@@ -110,9 +110,9 @@ class Advertiser:
 
         # Добавляем расчитываемые параметры
         pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['old']
-        pivoted_conversions['ARn%'] = ((pivoted_conversions['new'] / pivoted_conversions['reg'])*100).round(0)
-        pivoted_conversions['ARo%'] = ((pivoted_conversions['old'] / pivoted_conversions['reg'])*100).round(0)
-        pivoted_conversions['RLS%'] = ((pivoted_conversions['old'] / pivoted_conversions['total'])*100).round(0)
+        pivoted_conversions['ARn%'] = (pivoted_conversions['new'] / pivoted_conversions['reg']).round(2)
+        pivoted_conversions['ARo%'] = (pivoted_conversions['old'] / pivoted_conversions['reg']).round(2)
+        pivoted_conversions['RLS%'] = (pivoted_conversions['old'] / pivoted_conversions['total']).round(2)
 
         # Генерируем сводную таблицу с бюджетами по разным типам займов и группировкой по groupby
         pivoted_budget = data_frame.pivot_table(index=groupby, columns='loan_category', values='payouts', aggfunc='sum')
@@ -133,8 +133,6 @@ class Advertiser:
         merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype('int')
         merged_data['CPAo'] = (merged_data['costs_old'] / merged_data['old']).astype('int')
         merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype('int')
-
-        # Считаем показатель CPL - cost per lead (registration)
         merged_data['CPL'] = (merged_data['costs_total'] / merged_data['reg']).astype('int')
 
         return merged_data
