@@ -92,7 +92,7 @@ class Advertiser:
 
         return conversion_list
 
-    def general_stats(self, date_from: str, date_to: str, index: str):
+    def general_stats(self, date_from: str, date_to: str, groupby: str):
         # Делаем 1 запрос в API и считаем кол-во страниц в ответе
         pages = self.api_conversions_single_request(
             date_from=date_from,
@@ -104,8 +104,8 @@ class Advertiser:
         # Из списка конверсий собираем data frame
         data_frame = create_data_frame(input_data=conversion_list)
 
-        # Генерируем сводную таблицу с конверсиями и группировкой по index
-        pivoted_conversions = data_frame.pivot_table(index=index, columns='loan_category', values='goal',
+        # Генерируем сводную таблицу с конверсиями и группировкой по groupby
+        pivoted_conversions = data_frame.pivot_table(index=groupby, columns='loan_category', values='goal',
                                                      aggfunc='count').reindex(['reg', 'new', 'old'], axis=1)
 
         # Добавляем расчитываемые параметры
@@ -114,8 +114,8 @@ class Advertiser:
         pivoted_conversions['ARo%'] = ((pivoted_conversions['old'] / pivoted_conversions['reg'])*100).round(0)
         pivoted_conversions['RLS%'] = ((pivoted_conversions['old'] / pivoted_conversions['total'])*100).round(0)
 
-        # Генерируем сводную таблицу с бюджетами по разным типам займов и группировкой по index
-        pivoted_budget = data_frame.pivot_table(index=index, columns='loan_category', values='payouts', aggfunc='sum')
+        # Генерируем сводную таблицу с бюджетами по разным типам займов и группировкой по groupby
+        pivoted_budget = data_frame.pivot_table(index=groupby, columns='loan_category', values='payouts', aggfunc='sum')
 
         # Удаляем столбец 'reg'
         pivoted_budget.drop(columns='reg', inplace=True)
@@ -127,7 +127,7 @@ class Advertiser:
         pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_old']
 
         # Объединяем сводные таблицы с конверсиями и бюджетом
-        merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index)
+        merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=groupby)
 
         # Добавялем расчитываемые показатели
         merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype('int')
