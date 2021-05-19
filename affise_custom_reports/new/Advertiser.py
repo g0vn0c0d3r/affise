@@ -64,6 +64,15 @@ def goal_categorization(row):
         return 'new'
 
 
+def get_general_stats(dataframe, index):
+    pivoted_conversions = dataframe.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')
+    pivoted_budget = dataframe.groupby(by=index)['payouts'].sum()
+
+    res = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index)
+
+    return res
+
+
 class Advertiser:
 
     def __init__(self, adv_id):
@@ -99,7 +108,7 @@ class Advertiser:
 
         return conversion_list
 
-    def create_data_frame(self, date_from: str, date_to: str, index: str):
+    def create_data_frame(self, date_from: str, date_to: str):
         pages = self.api_single_request(date_from=date_from,
                                         date_to=date_to,
                                         rep_type='conversions')['pagination'][
