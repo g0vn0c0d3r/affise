@@ -183,3 +183,17 @@ class Advertiser:
         merged_data['CPL'] = (merged_data['costs_total'] / merged_data['reg']).astype('int')
 
         return merged_data
+
+    def get_data_frame(self, date_from: str, date_to: str):
+        # Делаем 1 запрос в API и считаем кол-во страниц в ответе
+        pages = self.api_conversions_single_request(
+            date_from=date_from,
+            date_to=date_to)['pagination']['total_count'] // Config.Credentials.LIMIT.value + 1
+
+        # Собираем все конверсии в 1 общий список
+        conversion_list = self.create_conversions_list(date_from=date_from, date_to=date_to, pages=pages)
+
+        # Из списка конверсий собираем data frame
+        data_frame = create_data_frame(input_data=conversion_list)
+
+        return data_frame
