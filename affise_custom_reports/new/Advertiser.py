@@ -6,7 +6,7 @@ import Config
 def create_data_frame(input_data: list):
     conversion_list = []
     columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
-               'partner', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6']
+               'partner', 'partner_id', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6']
 
     for item in input_data:
         date = item['created_at'].split(' ')[0]
@@ -17,6 +17,7 @@ def create_data_frame(input_data: list):
         goal = item['goal']
         payouts = item['payouts']
         partner = item['partner']['name']
+        partner_id = item['partner']['id']
         sub1 = item['sub1']
         sub2 = item['sub2']
         sub3 = item['sub3']
@@ -25,7 +26,7 @@ def create_data_frame(input_data: list):
         sub6 = item['sub6']
 
         conversion_list.append([date, action_id, click_id, status, offer_id, goal, payouts,
-                                partner, sub1, sub2, sub3, sub4, sub5, sub6])
+                                partner, partner_id, sub1, sub2, sub3, sub4, sub5, sub6])
 
     data_frame = pd.DataFrame(data=conversion_list, columns=columns)
 
@@ -64,10 +65,18 @@ def goal_categorization(row):
         return 'new'
 
 
-def get_general_stats(data, index):
+def get_general_stats(data, pid: int, wid: int, index: str):
+
+    if pid != 0:
+        if wid == 0:
+            data = data[data['partner_id'] == pid]
+        else:
+            data = data[data['partner_id'] == pid and data['sub3'] == wid]
+    else:
+        data = data
 
     # Создаем сводную таблицу с динамикой кол-ва конверсий в разбивке по типам
-    pivoted_conversions = data.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count')
+    pivoted_conversions = data.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count', fill_value=0)
 
     # Меняем очередность столбцов
     pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
@@ -79,7 +88,7 @@ def get_general_stats(data, index):
     pivoted_conversions['RLS%'] = (pivoted_conversions['rep'] / pivoted_conversions['total']).round(2)
 
     # Создаем сводную таблицу с динамикой бюджета
-    pivoted_budget = data.pivot_table(index=index, columns='loan_category', values='payouts', aggfunc='sum')
+    pivoted_budget = data.pivot_table(index=index, columns='loan_category', values='payouts', aggfunc='sum', fill_value=0)
 
     # Удаляем столбец с регистрациями т.к они бесплатные
     pivoted_budget.drop(columns=['reg'], inplace=True)
