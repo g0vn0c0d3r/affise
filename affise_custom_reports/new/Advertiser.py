@@ -1,6 +1,9 @@
 import requests
 import pandas as pd
 import Config
+import numpy as np
+import datetime
+import matplotlib.pyplot as plt
 
 
 def create_data_frame(input_data: list):
@@ -17,7 +20,7 @@ def create_data_frame(input_data: list):
         goal = item['goal']
         payouts = item['payouts']
         partner = item['partner']['name']
-        partner_id = item['partner']['id']
+        partner_id = str(item['partner']['id'])
         sub1 = item['sub1']
         sub2 = item['sub2']
         sub3 = item['sub3']
@@ -42,14 +45,21 @@ def create_data_frame(input_data: list):
     # переименовываем название целей в столбце goal
     data_frame['goal'].replace({
         'регистрация': 'registration',
+        'регистрация 1': 'registration',
         'Займ средний': 'low_score_client',
+        'Займ средний 2': 'low_score_client',
         'Займ хороший': 'med_score_client',
+        'Займ хороший 3': 'med_score_client',
         'Займ отличный': 'high_score_client',
+        'Займ отличный 4': 'high_score_client',
         'Повторный займ': 'repeated_loan'
     }, inplace=True)
 
     # категоризайия займов
     data_frame['loan_category'] = data_frame.apply(goal_categorization, axis=1)
+
+    # удаляем статусы declined
+    data_frame = data_frame[data_frame['status'] != 'declined']
 
     return data_frame
 
@@ -65,15 +75,13 @@ def goal_categorization(row):
         return 'new'
 
 
-def get_general_stats(data, pid: int, wid: int, index: str):
+def get_general_stats(data, pid: str, wid: str, index: str):
 
-    if pid != 0:
-        if wid == 0:
+    if pid != '0':
+        if wid == '0':
             data = data[data['partner_id'] == pid]
         else:
-            data = data[data['partner_id'] == pid and data['sub3'] == wid]
-    else:
-        data = data
+            data = data[(data['partner_id'] == pid) & (data['sub3'] == wid)]
 
     # Создаем сводную таблицу с динамикой кол-ва конверсий в разбивке по типам
     pivoted_conversions = data.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count', fill_value=0)
@@ -103,9 +111,20 @@ def get_general_stats(data, pid: int, wid: int, index: str):
     merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index)
 
     # Добавляем расчетные показатели
-    merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype('int')
-    merged_data['CPAo'] = (merged_data['costs_rep'] / merged_data['rep']).astype('int')
-    merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype('int')
+    merged_data['CPAn'] = merged_data['costs_new'] / merged_data['new']
+    merged_data['CPAo'] = merged_data['costs_rep'] / merged_data['rep']
+    merged_data['CPAr'] = merged_data['costs_total'] / merged_data['new']
+
+    # Меняем inf nan
+    merged_data.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # Меняем nan на 0
+    merged_data.fillna(0, inplace=True)
+
+    # Приводим столбцы со стоимостью к int, для округления
+    merged_data['CPAn'] = merged_data['CPAn'].astype('int')
+    merged_data['CPAo'] = merged_data['CPAo'].astype('int')
+    merged_data['CPAr'] = merged_data['CPAr'].astype('int')
 
     return merged_data
 
