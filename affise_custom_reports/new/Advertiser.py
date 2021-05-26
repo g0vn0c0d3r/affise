@@ -75,14 +75,7 @@ def goal_categorization(row):
         return 'new'
 
 
-def get_general_stats(data, pid: str, wid: str, index: str):
-
-    if pid != '0':
-        if wid == '0':
-            data = data[data['partner_id'] == pid]
-        else:
-            data = data[(data['partner_id'] == pid) & (data['sub3'] == wid)]
-
+def get_general_stats(data, index: str):
     # Создаем сводную таблицу с динамикой кол-ва конверсий в разбивке по типам
     pivoted_conversions = data.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count', fill_value=0)
 
