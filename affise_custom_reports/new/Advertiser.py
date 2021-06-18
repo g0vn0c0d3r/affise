@@ -2,8 +2,6 @@ import requests
 import pandas as pd
 import Config
 import numpy as np
-import datetime
-import matplotlib.pyplot as plt
 
 
 def create_data_frame(input_data: list):
@@ -120,6 +118,19 @@ def get_general_stats(data, index: str):
     merged_data['CPAr'] = merged_data['CPAr'].astype('int')
 
     return merged_data
+
+
+def get_loans_by_aff(data, index: str):
+    data = data.query('loan_category != "reg"')
+
+    pivoted_data = data.pivot_table(
+        index=index, columns='partner', values='goal',
+        aggfunc='count', fill_value=0, margins=True).sort_values(by='All', axis=1, ascending=False)
+
+    pivoted_data.drop(index='All', inplace=True)
+    pivoted_data.drop(columns='All', inplace=True)
+
+    return pivoted_data
 
 
 class Advertiser:
