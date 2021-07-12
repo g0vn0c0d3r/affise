@@ -133,6 +133,58 @@ def get_loans_by_aff(data, index: str):
     return pivoted_data
 
 
+def get_aff_web_stats(data, aff: str, web: str, index: str):
+    if web == '0':
+        data = data[data['partner_id'] == aff]
+    else:
+        data = data[(data['partner_id'] == aff) & (data['sub3'] == web)]
+
+    # Создаем сводную таблицу с динамикой кол-ва конверсий в разбивке по типам
+    pivoted_conversions = data.pivot_table(index=index, columns='loan_category', values='goal', aggfunc='count', fill_value=0)
+
+    # Меняем очередность столбцов
+    pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
+
+    # Добавляем расчетные показатели
+    pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['rep']
+    pivoted_conversions['ARn%'] = (pivoted_conversions['new'] / pivoted_conversions['reg']).round(2)
+    pivoted_conversions['ARr%'] = (pivoted_conversions['rep'] / pivoted_conversions['reg']).round(2)
+    pivoted_conversions['RLS%'] = (pivoted_conversions['rep'] / pivoted_conversions['total']).round(2)
+
+    # Создаем сводную таблицу с динамикой бюджета
+    pivoted_budget = data.pivot_table(index=index, columns='loan_category', values='payouts', aggfunc='sum', fill_value=0)
+
+    # Удаляем столбец с регистрациями т.к они бесплатные
+    pivoted_budget.drop(columns=['reg'], inplace=True)
+
+    # Перименовываем столбцы
+    pivoted_budget.rename(columns={'new': 'costs_new', 'rep': 'costs_rep'}, inplace=True)
+
+    # Добавляем столбец с общим бюджетом
+    pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_rep']
+
+    # Объеденям сводную с конверсиями и бюджетом
+    merged_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index)
+
+    # Добавляем расчетные показатели
+    merged_data['CPAn'] = merged_data['costs_new'] / merged_data['new']
+    merged_data['CPAo'] = merged_data['costs_rep'] / merged_data['rep']
+    merged_data['CPAr'] = merged_data['costs_total'] / merged_data['new']
+
+    # Меняем inf nan
+    merged_data.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # Меняем nan на 0
+    merged_data.fillna(0, inplace=True)
+
+    # Приводим столбцы со стоимостью к int, для округления
+    merged_data['CPAn'] = merged_data['CPAn'].astype('int')
+    merged_data['CPAo'] = merged_data['CPAo'].astype('int')
+    merged_data['CPAr'] = merged_data['CPAr'].astype('int')
+
+    return merged_data
+
+
 class Advertiser:
 
     def __init__(self, adv_id):
