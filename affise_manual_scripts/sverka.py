@@ -33,24 +33,21 @@ for page in range(pages):
         conversion_list.append(conversions)
 
 data = []
-columns = ['ts', 'project', 'offer_title', 'goal_name', 'goal_id', 'payouts',
-           'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6', 'affiliate']
+columns = ['ts', 'project', 'offer_title', 'goal_id', 'payouts',
+           'sub1', 'sub2', 'sub3', 'affiliate']
 for conversion in conversion_list:
     ts = conversion['created_at']
     project = conversion['advertiser']['title']
     offer_title = conversion['offer']['title']
-    goal_name = conversion['goal']
     goal_id = conversion['action_id']
     payouts = conversion['payouts']
     sub1 = conversion['sub1']
     sub2 = conversion['sub2']
     sub3 = conversion['sub3']
-    sub4 = conversion['sub4']
-    sub5 = conversion['sub5']
-    sub6 = conversion['sub6']
+
     affiliate = conversion['partner']['title']
 
-    data.append([ts, project, offer_title, goal_name, goal_id, payouts, sub1, sub2, sub3, sub4, sub5, sub6, affiliate])
+    data.append([ts, project, offer_title, goal_id, payouts, sub1, sub2, sub3, affiliate])
 
 data_frame = pd.DataFrame(data=data, columns=columns)
 
