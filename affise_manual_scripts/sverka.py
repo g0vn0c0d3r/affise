@@ -4,8 +4,8 @@ import pandas as pd
 API_URL = 'https://api-lime-finance.affise.com/'
 API_KEY = '0a3994e5f04ed3d755cba60eb50de7c6'
 
-date_from = '2021-11-01'
-date_to = '2021-11-30'
+date_from = '2021-12-01'
+date_to = '2021-12-31'
 status = 1
 limit = 2000
 
@@ -55,5 +55,5 @@ aff_list = data_frame['affiliate'].unique()
 
 for aff in aff_list:
     filtered_data = data_frame.query('affiliate == @aff').reset_index(drop=True)
-    filtered_data.to_csv(f'reports/2021/november/{aff}.csv')
+    filtered_data.to_csv(f'reports/2021/december/{aff}.csv')
 
