@@ -143,7 +143,11 @@ def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to
         clicks_list.append([date, clicks])
 
     df_clicks = pd.DataFrame(data=clicks_list, columns=columns)
+
     df_clicks['date'] = pd.to_datetime(df_clicks['date'])
+    df_clicks['week'] = df_clicks['date'].dt.isocalendar().week
+    df_clicks['month'] = df_clicks['date'].dt.month
+    df_clicks['year'] = df_clicks['date'].dt.year
 
     return df_clicks
 
@@ -151,27 +155,28 @@ def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to
 def get_dynamic_report(advertiser: str, aff: str, web: str, date_from: str, date_to: str, index: str):
     conversions = get_conversions_df(advertiser=advertiser, aff=aff, web=web, date_from=date_from, date_to=date_to)
 
-    # clicks = get_clicks_data(advertiser=advertiser, aff=aff, web=web, date_from=date_from, date_to=date_to)
-    #
-    # pivoted_conversions = conversions.pivot_table(index=index, columns='loan_category',
-    #                                               values='goal', aggfunc='count', fill_value=0)
-    #
-    # pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
-    #
-    # pivoted_budget = conversions.pivot_table(index=index, columns='loan_category',
-    #                                          values='payouts', aggfunc='sum', fill_value=0)
-    #
-    # pivoted_budget.drop(columns=['reg'], inplace=True)
-    #
-    # pivoted_budget.rename(columns={'new': 'costs_new', 'rep': 'costs_rep'}, inplace=True)
-    #
-    # pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_rep']
-    #
-    # conversions_final_df = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index).reset_index()
-    # conversions_final_df['date'] = pd.to_datetime(conversions_final_df['date'])
-    #
-    # merged_data = pd.merge(clicks, conversions_final_df, how='left', on=index)
-    #
+    clicks = get_clicks_data(advertiser=advertiser, aff=aff, web=web, date_from=date_from, date_to=date_to)
+
+    pivoted_conversions = conversions.pivot_table(index=index, columns='loan_category',
+                                                  values='goal', aggfunc='count', fill_value=0)
+
+    pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
+
+    pivoted_budget = conversions.pivot_table(index=index, columns='loan_category',
+                                             values='payouts', aggfunc='sum', fill_value=0)
+
+    pivoted_budget.drop(columns=['reg'], inplace=True)
+
+    pivoted_budget.rename(columns={'new': 'costs_new', 'rep': 'costs_rep'}, inplace=True)
+
+    pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_rep']
+
+    conversions_final_df = pd.merge(pivoted_conversions, pivoted_budget, how='left', left_index=True, right_index=True)
+    # conversions_final_df.reset_index(inplace=True)
+    conversions_final_df['date'] = pd.to_datetime(conversions_final_df['date'])
+
+    merged_data = pd.merge(clicks, conversions_final_df, how='left', left_index=True, right_index=True)
+
     # merged_data['CR%'] = ((merged_data['reg'] / merged_data['clicks']) * 100).round(1)
     # merged_data['AR%'] = ((merged_data['new'] / merged_data['reg']) * 100).round(1)
     # merged_data['RLS%'] = ((merged_data['rep'] / (merged_data['new'] + merged_data['rep'])) * 100).round(1)
@@ -179,7 +184,7 @@ def get_dynamic_report(advertiser: str, aff: str, web: str, date_from: str, date
     # merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype(int)
     # merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype(int)
 
-    return conversions
+    return conversions_final_df
 
 
 
