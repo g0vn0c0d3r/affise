@@ -31,7 +31,7 @@ def single_api_conv_request(advertiser: str, date_from: str, date_to: str, page=
     return resp.json()
 
 
-def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
+def get_conversions_df(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
 
     pages = single_api_conv_request(
         advertiser=advertiser,
@@ -88,57 +88,150 @@ def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: st
     else:
         conversions_dataframe = conversions_dataframe.query('partner_id == @aff and sub3 == @web')
 
+    conversions_dataframe['date'] = pd.to_datetime(conversions_dataframe['date'])
+    conversions_dataframe['week'] = conversions_dataframe['date'].dt.isocalendar().week
+    conversions_dataframe['month'] = conversions_dataframe['date'].dt.month
+    conversions_dataframe['year'] = conversions_dataframe['date'].dt.year
+
     return conversions_dataframe
 
 
+def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
 
+    if web == '0':
+        if aff != '0':
+            clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
+                                  params=(
+                                      ('slice[]', 'year'),
+                                      ('slice[]', 'month'),
+                                      ('slice[]', 'day'),
+                                      ('filter[date_from]', date_from),
+                                      ('filter[date_to]', date_to),
+                                      ('filter[advertiser]', advertiser),
+                                      ('filter[partner]', aff)
+                                  )).json()
+        else:
+            clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
+                                  params=(
+                                      ('slice[]', 'year'),
+                                      ('slice[]', 'month'),
+                                      ('slice[]', 'day'),
+                                      ('filter[date_from]', date_from),
+                                      ('filter[date_to]', date_to),
+                                      ('filter[advertiser]', advertiser)
+                                  )).json()
+    else:
+        clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
+                              params=(
+                                  ('slice[]', 'year'),
+                                  ('slice[]', 'month'),
+                                  ('slice[]', 'day'),
+                                  ('filter[date_from]', date_from),
+                                  ('filter[date_to]', date_to),
+                                  ('filter[advertiser]', advertiser),
+                                  ('filter[partner]', aff),
+                                  ('filter[sub3]', web)
+                              )).json()
+
+    clicks_list = []
+    columns = ['date', 'clicks']
+
+    for item in clicks['stats']:
+        date = f'{item["slice"]["year"]}-{item["slice"]["month"]}-{item["slice"]["day"]}'
+        clicks = int(item['traffic']['uniq'])
+
+        clicks_list.append([date, clicks])
+
+    df_clicks = pd.DataFrame(data=clicks_list, columns=columns)
+    df_clicks['date'] = pd.to_datetime(df_clicks['date'])
+
+    return df_clicks
+
+
+def get_dynamic_report(advertiser: str, aff: str, web: str, date_from: str, date_to: str, index: str):
+    conversions = get_conversions_df(advertiser=advertiser, aff=aff, web=web, date_from=date_from, date_to=date_to)
+
+    # clicks = get_clicks_data(advertiser=advertiser, aff=aff, web=web, date_from=date_from, date_to=date_to)
     #
-    # # Создаем сводную таблицу с динамикой бюджета
-    # pivoted_budget = df_conv.pivot_table(index='date', columns='loan_category',
-    #                                      values='payouts', aggfunc='sum', fill_value=0).reset_index()
+    # pivoted_conversions = conversions.pivot_table(index=index, columns='loan_category',
+    #                                               values='goal', aggfunc='count', fill_value=0)
     #
-    # # Удаляем столбец с регистрациями т.к они бесплатные
+    # pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
+    #
+    # pivoted_budget = conversions.pivot_table(index=index, columns='loan_category',
+    #                                          values='payouts', aggfunc='sum', fill_value=0)
+    #
     # pivoted_budget.drop(columns=['reg'], inplace=True)
     #
-    # # Перименовываем столбцы
     # pivoted_budget.rename(columns={'new': 'costs_new', 'rep': 'costs_rep'}, inplace=True)
     #
-    # # Добавляем столбец с общим бюджетом
     # pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_rep']
     #
-    # pivoted_budget['date'] = pd.to_datetime(pivoted_budget['date'])
+    # conversions_final_df = pd.merge(pivoted_conversions, pivoted_budget, how='left', on=index).reset_index()
+    # conversions_final_df['date'] = pd.to_datetime(conversions_final_df['date'])
     #
+    # merged_data = pd.merge(clicks, conversions_final_df, how='left', on=index)
     #
-    #
-    #
-    #
-    #
-    # clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
-    #                       params=(
-    #                           ('slice[]', 'year'),
-    #                           ('slice[]', 'month'),
-    #                           ('slice[]', 'day'),
-    #                           ('filter[date_from]', date_from),
-    #                           ('filter[date_to]', date_to)
-    #                       )).json()
-    #
-    # clicks_list = []
-    # columns = ['date', 'clicks']
-    # for item in clicks['stats']:
-    #     date = f'{item["slice"]["year"]}-{item["slice"]["month"]}-{item["slice"]["day"]}'
-    #     clicks = int(item['traffic']['uniq'])
-    #
-    #     clicks_list.append([date, clicks])
-    #
-    # df_clicks = pd.DataFrame(data=clicks_list, columns=columns)
-    # df_clicks['date'] = pd.to_datetime(df_clicks['date'])
-    #
-    # output_data = pd.merge(df_clicks, pivoted_conversions, on='date')
-    #
-    # output_data['CR%'] = ((output_data['reg'] / output_data['clicks']) * 100).round(2)
-    # output_data['AR%'] = ((output_data['new'] / output_data['reg']) * 100).round(2)
-    #
-    # output_data = pd.merge(output_data, pivoted_budget, on='date')
-    #
-    #
-    # return output_data
+    # merged_data['CR%'] = ((merged_data['reg'] / merged_data['clicks']) * 100).round(1)
+    # merged_data['AR%'] = ((merged_data['new'] / merged_data['reg']) * 100).round(1)
+    # merged_data['RLS%'] = ((merged_data['rep'] / (merged_data['new'] + merged_data['rep'])) * 100).round(1)
+    # merged_data['EPC'] = (merged_data['costs_total'] / merged_data['clicks']).astype(int)
+    # merged_data['CPAn'] = (merged_data['costs_new'] / merged_data['new']).astype(int)
+    # merged_data['CPAr'] = (merged_data['costs_total'] / merged_data['new']).astype(int)
+
+    return conversions
+
+
+
+
+
+#
+# # Создаем сводную таблицу с динамикой бюджета
+# pivoted_budget = df_conv.pivot_table(index='date', columns='loan_category',
+#                                      values='payouts', aggfunc='sum', fill_value=0).reset_index()
+#
+# # Удаляем столбец с регистрациями т.к они бесплатные
+# pivoted_budget.drop(columns=['reg'], inplace=True)
+#
+# # Перименовываем столбцы
+# pivoted_budget.rename(columns={'new': 'costs_new', 'rep': 'costs_rep'}, inplace=True)
+#
+# # Добавляем столбец с общим бюджетом
+# pivoted_budget['costs_total'] = pivoted_budget['costs_new'] + pivoted_budget['costs_rep']
+#
+# pivoted_budget['date'] = pd.to_datetime(pivoted_budget['date'])
+#
+#
+#
+#
+#
+#
+# clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
+#                       params=(
+#                           ('slice[]', 'year'),
+#                           ('slice[]', 'month'),
+#                           ('slice[]', 'day'),
+#                           ('filter[date_from]', date_from),
+#                           ('filter[date_to]', date_to)
+#                       )).json()
+#
+# clicks_list = []
+# columns = ['date', 'clicks']
+# for item in clicks['stats']:
+#     date = f'{item["slice"]["year"]}-{item["slice"]["month"]}-{item["slice"]["day"]}'
+#     clicks = int(item['traffic']['uniq'])
+#
+#     clicks_list.append([date, clicks])
+#
+# df_clicks = pd.DataFrame(data=clicks_list, columns=columns)
+# df_clicks['date'] = pd.to_datetime(df_clicks['date'])
+#
+# output_data = pd.merge(df_clicks, pivoted_conversions, on='date')
+#
+# output_data['CR%'] = ((output_data['reg'] / output_data['clicks']) * 100).round(2)
+# output_data['AR%'] = ((output_data['new'] / output_data['reg']) * 100).round(2)
+#
+# output_data = pd.merge(output_data, pivoted_budget, on='date')
+#
+#
+# return output_data
