@@ -142,7 +142,7 @@ def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to
 
         clicks_list.append([date, clicks])
 
-    df_clicks = pd.DataFrame(data=clicks_list, columns=columns)
+    df_clicks = pd.DataFrame(data=clicks_list, columns=columns).fillna(0)
 
     df_clicks['date'] = pd.to_datetime(df_clicks['date'])
     df_clicks['week'] = df_clicks['date'].dt.isocalendar().week
