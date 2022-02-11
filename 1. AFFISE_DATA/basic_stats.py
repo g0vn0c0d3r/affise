@@ -28,8 +28,9 @@ def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str,
                                 ('partner[]', int(aff)),
                                 ('subid3', web),
                                 ('date_from', date_from),
-                                ('date_to', date_to)
-                            ))
+                                ('date_to', date_to),
+                                ('page', page),
+                                ('limit', limit)))
 
     else:
         if aff == '0':
@@ -37,34 +38,36 @@ def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str,
                                 params=(
                                     ('advertiser', advertiser),
                                     ('date_from', date_from),
-                                    ('date_to', date_to)
-                                ))
+                                    ('date_to', date_to),
+                                    ('page', page),
+                                    ('limit', limit)))
         else:
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
                                     ('partner[]', int(aff)),
+                                    # ('subid3', web),
                                     ('date_from', date_from),
-                                    ('date_to', date_to)
-                                ))
+                                    ('date_to', date_to),
+                                    ('page', page),
+                                    ('limit', limit)))
     return resp.json()
 
 
-def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str, limit=5000):
-    clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
-                          params=(
-                              ('slice[]', 'year'),
-                              ('slice[]', 'month'),
-                              ('slice[]', 'day'),
-                              ('filter[date_from]', date_from),
-                              ('filter[date_to]', date_to),
-                              ('filter[advertiser]', advertiser),
-                              ('filter[partner]', aff),
-                              ('filter[partner]', web),
-                              ('limit', limit)
-                          )).json()
-
-    return clicks
+# def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
+#     clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
+#                           params=(
+#                               ('slice[]', 'year'),
+#                               ('slice[]', 'month'),
+#                               ('slice[]', 'day'),
+#                               ('filter[date_from]', date_from),
+#                               ('filter[date_to]', date_to),
+#                               ('filter[advertiser]', advertiser),
+#                               ('filter[partner]', aff),
+#                               ('filter[partner]', web)
+#                           )).json()
+#
+#     return clicks
 
 
 def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
