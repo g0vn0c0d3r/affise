@@ -20,12 +20,12 @@ def goal_categorization(row):
         return 'new'
 
 
-def single_api_conv_request(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str, page=1, limit=1):
+def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str, date_to: str, page=1, limit=1):
     if web != '0':
         resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                             params=(
                                 ('advertiser', advertiser),
-                                ('partner[]', int(affiliate)),
+                                ('partner[]', int(aff)),
                                 ('subid3', web),
                                 ('date_from', date_from),
                                 ('date_to', date_to),
@@ -33,7 +33,7 @@ def single_api_conv_request(advertiser: str, affiliate: str, web: str, date_from
                                 ('limit', limit)))
 
     else:
-        if affiliate == '0':
+        if aff == '0':
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
@@ -47,7 +47,7 @@ def single_api_conv_request(advertiser: str, affiliate: str, web: str, date_from
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
-                                    ('partner[]', int(affiliate)),
+                                    ('partner[]', int(aff)),
                                     # ('subid3', web),
                                     ('date_from', date_from),
                                     ('date_to', date_to),
@@ -56,13 +56,26 @@ def single_api_conv_request(advertiser: str, affiliate: str, web: str, date_from
     return resp.json()
 
 
-def get_conversions_data(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str):
-    pages = single_api_conv_request(advertiser=advertiser, affiliate=affiliate, web=web,
+def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
+    clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
+                          params=(
+                              ('slice[]', 'year'),
+                              ('slice[]', 'month'),
+                              ('slice[]', 'day'),
+                              ('filter[date_from]', date_from),
+                              ('filter[date_to]', date_to),
+                              ('filter[advertiser]', advertiser),
+                              ('filter[partner]', aff),
+                              ('filter[partner]', web)
+                          )).json()
+
+def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
+    pages = single_api_conv_request(advertiser=advertiser, aff=aff, web=web,
                                     date_from=date_from, date_to=date_to)['pagination']['total_count'] // LIMIT + 1
 
     raw_conversions = []
     for page in range(pages):
-        conversions = single_api_conv_request(advertiser=advertiser, affiliate=affiliate, web=web,
+        conversions = single_api_conv_request(advertiser=advertiser, aff=aff, web=web,
                                               date_from=date_from, date_to=date_to, limit=LIMIT)['conversions']
 
         raw_conversions.extend(conversions)
@@ -104,6 +117,25 @@ def get_conversions_data(advertiser: str, affiliate: str, web: str, date_from: s
     conversions_dataframe['year'] = conversions_dataframe['date'].dt.year
 
     return conversions_dataframe
+
+
+def get_conversion_pivot(advertiser: str, aff: str, web: str, date_from: str, date_to: str, index: str):
+    conversion_df = get_conversions_dataframe(advertiser=advertiser, aff=aff, web=web, date_from=date_from,
+                                              date_to=date_to)
+
+    pivoted_conversions = conversion_df.pivot_table(index=index, columns='loan_category',
+                                                    values='goal', aggfunc='count', fill_value=0)
+    pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
+    pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['rep']
+
+    pivoted_budget = conversion_df.pivot_table(index=index, columns='loan_category',
+                                               values='payouts', aggfunc='sum', fill_value=0)
+    pivoted_budget.drop(columns=['reg'], inplace=True)
+    pivoted_budget.rename(columns={'new': 'costs_new', 'rep': 'costs_rep'}, inplace=True)
+
+    merged_conversion_data = pd.merge(pivoted_conversions, pivoted_budget, how='left', left_index=True, right_index=True)
+
+    return merged_conversion_data
 
 #
 # def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
