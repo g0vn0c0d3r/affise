@@ -4,7 +4,7 @@ import datetime
 
 API_URL = 'https://api-lime-finance.affise.com'
 API_KEY = '0a3994e5f04ed3d755cba60eb50de7c6'
-LIMIT = 5000
+LIMIT = 10000
 LIME = '5a558391c3ebae42008b4567'
 KONGA = '5a558967c3ebae43008b4567'
 
@@ -20,12 +20,12 @@ def goal_categorization(row):
         return 'new'
 
 
-def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str, date_to: str, page=1, limit=1):
+def single_api_conv_request(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str, page=1, limit=1):
     if web != '0':
         resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                             params=(
                                 ('advertiser', advertiser),
-                                ('partner[]', int(aff)),
+                                ('partner[]', int(affiliate)),
                                 ('subid3', web),
                                 ('date_from', date_from),
                                 ('date_to', date_to),
@@ -33,10 +33,12 @@ def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str,
                                 ('limit', limit)))
 
     else:
-        if aff == '0':
+        if affiliate == '0':
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
+                                    # ('partner[]', int(affiliate)),
+                                    # ('subid3', web),
                                     ('date_from', date_from),
                                     ('date_to', date_to),
                                     ('page', page),
@@ -45,7 +47,7 @@ def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str,
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
-                                    ('partner[]', int(aff)),
+                                    ('partner[]', int(affiliate)),
                                     # ('subid3', web),
                                     ('date_from', date_from),
                                     ('date_to', date_to),
@@ -54,30 +56,15 @@ def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str,
     return resp.json()
 
 
-# def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
-#     clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
-#                           params=(
-#                               ('slice[]', 'year'),
-#                               ('slice[]', 'month'),
-#                               ('slice[]', 'day'),
-#                               ('filter[date_from]', date_from),
-#                               ('filter[date_to]', date_to),
-#                               ('filter[advertiser]', advertiser),
-#                               ('filter[partner]', aff),
-#                               ('filter[partner]', web)
-#                           )).json()
-#
-#     return clicks
-
-
-def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
-    pages = single_api_conv_request(advertiser=advertiser, aff=aff, web=web,
+def get_conversions_dataframe(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str):
+    pages = single_api_conv_request(advertiser=advertiser, affiliate=affiliate, web=web,
                                     date_from=date_from, date_to=date_to)['pagination']['total_count'] // LIMIT + 1
 
     raw_conversions = []
     for page in range(pages):
-        conversions = single_api_conv_request(advertiser=advertiser, aff=aff, web=web,
-                                              date_from=date_from, date_to=date_to, limit=LIMIT)['conversions']
+        conversions = single_api_conv_request(advertiser=advertiser, affiliate=affiliate, web=web,
+                                              date_from=date_from, date_to=date_to,
+                                              page=page+1, limit=LIMIT)['conversions']
 
         raw_conversions.extend(conversions)
 
@@ -120,8 +107,8 @@ def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: st
     return conversions_dataframe
 
 
-def get_conversion_pivot(advertiser: str, aff: str, web: str, date_from: str, date_to: str, index: str):
-    conversion_df = get_conversions_dataframe(advertiser=advertiser, aff=aff, web=web, date_from=date_from,
+def get_conversion_pivot(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str, index: str):
+    conversion_df = get_conversions_dataframe(advertiser=advertiser, affiliate=affiliate, web=web, date_from=date_from,
                                               date_to=date_to)
 
     pivoted_conversions = conversion_df.pivot_table(index=index, columns='loan_category',
