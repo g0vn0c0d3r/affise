@@ -4,7 +4,7 @@ import datetime
 
 API_URL = 'https://api-lime-finance.affise.com'
 API_KEY = '0a3994e5f04ed3d755cba60eb50de7c6'
-LIMIT = 10000
+LIMIT = 5000
 LIME = '5a558391c3ebae42008b4567'
 KONGA = '5a558967c3ebae43008b4567'
 
@@ -28,35 +28,29 @@ def single_api_conv_request(advertiser: str, aff: str, web: str, date_from: str,
                                 ('partner[]', int(aff)),
                                 ('subid3', web),
                                 ('date_from', date_from),
-                                ('date_to', date_to),
-                                ('page', page),
-                                ('limit', limit)))
+                                ('date_to', date_to)
+                            ))
 
     else:
         if aff == '0':
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
-                                    # ('partner[]', int(affiliate)),
-                                    # ('subid3', web),
                                     ('date_from', date_from),
-                                    ('date_to', date_to),
-                                    ('page', page),
-                                    ('limit', limit)))
+                                    ('date_to', date_to)
+                                ))
         else:
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
                                     ('advertiser', advertiser),
                                     ('partner[]', int(aff)),
-                                    # ('subid3', web),
                                     ('date_from', date_from),
-                                    ('date_to', date_to),
-                                    ('page', page),
-                                    ('limit', limit)))
+                                    ('date_to', date_to)
+                                ))
     return resp.json()
 
 
-def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
+def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to: str, limit=5000):
     clicks = requests.get(url=API_URL + '/3.0/stats/custom', headers={'API-Key': API_KEY},
                           params=(
                               ('slice[]', 'year'),
@@ -66,8 +60,12 @@ def get_clicks_data(advertiser: str, aff: str, web: str, date_from: str, date_to
                               ('filter[date_to]', date_to),
                               ('filter[advertiser]', advertiser),
                               ('filter[partner]', aff),
-                              ('filter[partner]', web)
+                              ('filter[partner]', web),
+                              ('limit', limit)
                           )).json()
+
+    return clicks
+
 
 def get_conversions_dataframe(advertiser: str, aff: str, web: str, date_from: str, date_to: str):
     pages = single_api_conv_request(advertiser=advertiser, aff=aff, web=web,
