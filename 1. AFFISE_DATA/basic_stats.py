@@ -92,16 +92,23 @@ def single_api_clicks_request(advertiser: str, affiliate: str, web: str, date_fr
 
 
 def get_conversions_dataframe(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str):
-    pages = single_api_conversions_request(advertiser=advertiser, affiliate=affiliate, web=web,
-                                           date_from=date_from, date_to=date_to)['pagination']['total_count'] // LIMIT + 1
+    pages = single_api_conversions_request(advertiser=advertiser,
+                                           affiliate=affiliate,
+                                           web=web,
+                                           date_from=date_from,
+                                           date_to=date_to)['pagination']['total_count'] // LIMIT + 1
 
     raw_conversions = []
     for page in range(pages):
-        conversions = single_api_conversions_request(advertiser=advertiser, affiliate=affiliate, web=web,
-                                                     date_from=date_from, date_to=date_to,
-                                                     page=page+1, limit=LIMIT)['conversions']
+        try:
+            conversions = single_api_conversions_request(advertiser=advertiser, affiliate=affiliate, web=web,
+                                                         date_from=date_from, date_to=date_to,
+                                                         page=page+1, limit=LIMIT)['conversions']
+            raw_conversions.extend(conversions)
+        except KeyError:
+            pass
 
-        raw_conversions.extend(conversions)
+
 
     columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
                'partner', 'partner_id', 'referrer', 'sub1', 'sub2', 'sub3']
@@ -148,10 +155,13 @@ def get_clicks_dataframe(advertiser: str, affiliate: str, web: str, date_from: s
 
     raw_clicks = []
     for page in range(pages):
-        clicks = single_api_clicks_request(advertiser=advertiser, affiliate=affiliate, web=web,
-                                           date_from=date_from, date_to=date_to,
-                                           page=page+1, limit=limit)['stats']
-        raw_clicks.extend(clicks)
+        try:
+            clicks = single_api_clicks_request(advertiser=advertiser, affiliate=affiliate, web=web,
+                                               date_from=date_from, date_to=date_to,
+                                               page=page+1, limit=limit)['stats']
+            raw_clicks.extend(clicks)
+        except KeyError:
+            pass
 
     clicks_list = []
     columns = ['date', 'clicks']
@@ -174,7 +184,7 @@ def get_clicks_dataframe(advertiser: str, affiliate: str, web: str, date_from: s
 def get_dynamic_report(conv_df, clicks_df, index: str):
     pivoted_conversions = conv_df.pivot_table(index=index, columns='loan_category',
                                               values='goal', aggfunc='count', fill_value=0)
-    # pivoted_conversions = pivoted_conversions[['reg', 'new', 'rep']]
+
     pivoted_conversions['total'] = pivoted_conversions['new'] + pivoted_conversions['rep']
 
     pivoted_budget = conv_df.groupby(by=index).sum()['payouts']
@@ -209,6 +219,20 @@ def get_dynamic_report(conv_df, clicks_df, index: str):
 
     output_data = output_data[['clicks', 'reg', 'new', 'rep', 'total', 'CR%', 'AR%',
                                'RLS%', 'payouts', 'EPC', 'EPL', 'CPAn', 'CPAr']]
+
+    personal_payouts = conv_df.query('payouts in [3800, 4000, 4200]').groupby(by=index).agg({'goal': 'count', 'payouts': 'sum'})
+    personal_payouts['CPA_pp'] = (personal_payouts['payouts'] / personal_payouts['goal']).astype('int')
+    personal_payouts.rename(columns={'goal': 'new_pp'}, inplace=True)
+    personal_payouts.drop(columns='payouts', inplace=True)
+
+    nonpersonal_payouts = conv_df.query('payouts in [1800, 3000, 4500]').groupby(by=index).agg({'goal': 'count', 'payouts': 'sum'})
+    nonpersonal_payouts['CPA_np'] = (nonpersonal_payouts['payouts'] / nonpersonal_payouts['goal']).astype('int')
+    nonpersonal_payouts.rename(columns={'goal': 'new_np'}, inplace=True)
+    nonpersonal_payouts.drop(columns='payouts', inplace=True)
+
+    output_data = pd.merge(output_data, personal_payouts, how='left', left_index=True, right_index=True)
+    output_data = pd.merge(output_data, nonpersonal_payouts, how='left', left_index=True, right_index=True)
+    output_data.fillna(0, inplace=True)
 
     return output_data
 
