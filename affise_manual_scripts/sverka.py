@@ -5,7 +5,7 @@ API_URL = 'https://api-lime-finance.affise.com/'
 API_KEY = '0a3994e5f04ed3d755cba60eb50de7c6'
 
 date_from = '2022-02-01'
-date_to = '2022-02-28'
+date_to = '2022-02-20'
 status = 1
 limit = 2000
 

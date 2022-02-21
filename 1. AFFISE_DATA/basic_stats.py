@@ -99,12 +99,13 @@ def single_api_clicks_request(advertiser: str, affiliate: str, web: str, date_fr
     return response
 
 
-def get_conversions_dataframe(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str):
+def get_conversions_dataframe(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str, status=(1, 2)):
     pages = single_api_conversions_request(advertiser=advertiser,
                                            affiliate=affiliate,
                                            web=web,
                                            date_from=date_from,
-                                           date_to=date_to)['pagination']['total_count'] // LIMIT + 1
+                                           date_to=date_to,
+                                           status=status)['pagination']['total_count'] // LIMIT + 1
 
     raw_conversions = []
     for page in range(pages):
@@ -115,8 +116,6 @@ def get_conversions_dataframe(advertiser: str, affiliate: str, web: str, date_fr
             raw_conversions.extend(conversions)
         except KeyError:
             pass
-
-
 
     columns = ['date', 'action_id', 'click_id', 'status', 'offer_id', 'goal', 'payouts',
                'partner', 'partner_id', 'referrer', 'sub1', 'sub2', 'sub3']
