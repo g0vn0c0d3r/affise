@@ -21,7 +21,9 @@ def goal_categorization(row):
         return 'new'
 
 
-def single_api_conversions_request(advertiser: str, affiliate: str, web: str, date_from: str, date_to: str, page=1, limit=1):
+def single_api_conversions_request(advertiser: str, affiliate: str, web: str,
+                                   date_from: str, date_to: str, status=(1, 2),
+                                   page=1, limit=1):
     if web != '0':
         resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                             params=(
@@ -31,7 +33,9 @@ def single_api_conversions_request(advertiser: str, affiliate: str, web: str, da
                                 ('date_from', date_from),
                                 ('date_to', date_to),
                                 ('page', page),
-                                ('limit', limit)))
+                                ('limit', limit),
+                                ('status[]', list(status))
+                            ))
 
     else:
         if affiliate == '0':
@@ -41,7 +45,9 @@ def single_api_conversions_request(advertiser: str, affiliate: str, web: str, da
                                     ('date_from', date_from),
                                     ('date_to', date_to),
                                     ('page', page),
-                                    ('limit', limit)))
+                                    ('limit', limit),
+                                    ('status[]', list(status))
+                                ))
         else:
             resp = requests.get(url=API_URL + '/3.0/stats/conversions', headers={'API-Key': API_KEY},
                                 params=(
@@ -50,7 +56,9 @@ def single_api_conversions_request(advertiser: str, affiliate: str, web: str, da
                                     ('date_from', date_from),
                                     ('date_to', date_to),
                                     ('page', page),
-                                    ('limit', limit)))
+                                    ('limit', limit),
+                                    ('status[]', list(status))
+                                ))
     return resp.json()
 
 
@@ -213,26 +221,27 @@ def get_dynamic_report(conv_df, clicks_df, index: str):
     output_data.fillna(0, inplace=True)
 
     # Изменим типы данных для некоторых столбцов
-    chng_cols = ['reg', 'new', 'rep', 'total', 'payouts', 'EPC', 'EPL', 'CPAn', 'CPAr']
-    for col in chng_cols:
-        output_data[col] = output_data[col].astype(int)
 
     output_data = output_data[['clicks', 'reg', 'new', 'rep', 'total', 'CR%', 'AR%',
                                'RLS%', 'payouts', 'EPC', 'EPL', 'CPAn', 'CPAr']]
 
-    personal_payouts = conv_df.query('payouts in [3800, 4000, 4200]').groupby(by=index).agg({'goal': 'count', 'payouts': 'sum'})
-    personal_payouts['CPA_pp'] = (personal_payouts['payouts'] / personal_payouts['goal']).astype('int')
+    personal_payouts = conv_df.query('payouts not in [0, 500, 1800, 3000, 4500]').groupby(by=index).agg({'goal': 'count', 'payouts': 'sum'})
+    personal_payouts['CPA_pp'] = personal_payouts['payouts'] / personal_payouts['goal']
     personal_payouts.rename(columns={'goal': 'new_pp'}, inplace=True)
     personal_payouts.drop(columns='payouts', inplace=True)
 
     nonpersonal_payouts = conv_df.query('payouts in [1800, 3000, 4500]').groupby(by=index).agg({'goal': 'count', 'payouts': 'sum'})
-    nonpersonal_payouts['CPA_np'] = (nonpersonal_payouts['payouts'] / nonpersonal_payouts['goal']).astype('int')
+    nonpersonal_payouts['CPA_np'] = nonpersonal_payouts['payouts'] / nonpersonal_payouts['goal']
     nonpersonal_payouts.rename(columns={'goal': 'new_np'}, inplace=True)
     nonpersonal_payouts.drop(columns='payouts', inplace=True)
 
     output_data = pd.merge(output_data, personal_payouts, how='left', left_index=True, right_index=True)
     output_data = pd.merge(output_data, nonpersonal_payouts, how='left', left_index=True, right_index=True)
     output_data.fillna(0, inplace=True)
+
+    chng_cols = ['reg', 'new', 'rep', 'total', 'payouts', 'EPC', 'EPL', 'CPAn', 'CPAr', 'CPA_pp', 'CPA_np']
+    for col in chng_cols:
+        output_data[col] = output_data[col].astype(int)
 
     return output_data
 
